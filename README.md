@@ -6,6 +6,21 @@ This app was initialized with [create-near-app]
 Run with "npm run start"
 
 
+Things to Decide
+================
+
+### The data-structure of the contract, idea:
+   - (1) Each time you pay, save the data of payment? If it was one month ago, get out of here
+   - (2) Each time you pay, we save the content that you have unlocked (problem => lots of storage needed per user)
+
+### How to unlock content?
+
+We cannot just have the contract saying "YES, they has access", and then showing stuff with JS... it's too easy to hack.
+Maybe the contract could respond with the link to the content... in which case we need to give the contract creator the
+ability to store content in the contract... don't know how to do it, but sounds possible.
+
+If we use data structure (1) then we simply return a list with all the contents; if we use data structure (2) then we need to reply on each call.
+
 Quick Start
 ===========
 
