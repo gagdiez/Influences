@@ -1,6 +1,6 @@
 import 'regenerator-runtime/runtime'
 
-import { initContract, login, logout, pay50, pay200 } from './utils'
+import { initContract, login, logout, pay50, pay200, influencer_name } from './utils'
 
 import getConfig from './config'
 const { networkId } = getConfig(process.env.NODE_ENV || 'development')
@@ -29,10 +29,18 @@ async function signedInFlow() {
 }
 
 async function show_content(){
-  let payed = await contract.hasAccess()
+  let subcribed = await contract.hasAccess({influencer:influencer_name})
   
-  if (payed == "YES") document.querySelector('#payed').style.display = 'block'
-  else document.querySelector('#not-payed').style.display = 'block'
+  if (subcribed){
+  	document.querySelector('#payed').style.display = 'block'
+  	let content = await contract.getContent({influencer:'influencer.testnet'})
+  	
+  	document.querySelectorAll('[data-behavior=influencer-content]').forEach(el => {
+      el.innerText = content
+    })
+  }else{
+    document.querySelector('#not-payed').style.display = 'block'
+  }
 }
 
 // `nearInitPromise` gets called on page load

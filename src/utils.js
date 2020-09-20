@@ -18,9 +18,9 @@ export async function initContract() {
   // Initializing our contract APIs by contract name and configuration
   window.contract = await new Contract(window.walletConnection.account(), nearConfig.contractName, {
     // View methods are read only. They don't modify the state, but usually return some value.
-      viewMethods: [],
+    viewMethods: [],
     // Change methods can modify the state. But you don't receive the returned value when called.
-    changeMethods: ['hasAccess', 'getAccess'],
+    changeMethods: ['hasAccess', 'getContent', 'subscribeTo', 'addContent', 'delContent'],
   })
 }
 
@@ -38,12 +38,16 @@ export function login() {
   window.walletConnection.requestSignIn(nearConfig.contractName)
 }
 
+export const influencer_name = 'influencer.testnet'
+
 export function pay50(){
   let account = window.walletConnection.account()
-  account.functionCall(nearConfig.contractName, 'getAccess', null, 0, 50)
+  account.functionCall(nearConfig.contractName, 'subscribeTo',
+  					   {influencer:influencer_name}, 0, 50)
 }
 
 export function pay200(){
   let account = window.walletConnection.account()
-  account.functionCall(nearConfig.contractName, 'getAccess', null, 0, 200)
+  account.functionCall(nearConfig.contractName, 'subscribeTo',
+  					   {influencer:influencer_name}, 0, 200)
 }
