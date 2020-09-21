@@ -72,7 +72,7 @@
 	            </ul>
 
 	            <ul class="list-unstyled components">
-	                <li><a type="button" id="become-influencer-btn" class="nav-btn" href="#">Become an influencer</a></li>
+	                <li><a type="button" data-toggle="modal" data-target="#edit-profile-modal" class="nav-btn" href="#" id="become-influencer-btn">Become an influencer</a></li>
 	                <li><a type="button" id="my-profile-btn" class="nav-btn influencer-btn" href="#">My profile</a></li>
 	                <li><a type="button" data-toggle="modal" data-target="#edit-profile-modal" class="nav-btn influencer-btn" href="#">Edit profile</a></li>
 	                <li><a type="button" data-toggle="modal" data-target="#add-content-modal" class="nav-btn influencer-btn" href="#">Add post</a></li>
@@ -367,7 +367,7 @@
 				setProfile(loggedUser.id)
 			});
 
-			$("#add-content-modal").on("shown.bs.modal", function () { 
+			$("#add-content-modal").on("show.bs.modal", function () { 
 				$('#upload-content-preview').hide();
 		        $('.btn-upload').show();
 		        $("#upload-content-input").val('');
@@ -387,8 +387,18 @@
     			$("#featured-influencers").show();
 		    })
 
-		    $("#edit-profile-modal").on("shown.bs.modal", function () { 
+		    $("#edit-profile-modal").on("show.bs.modal", function () { 
 		    	// set profile to edit
+
+		    	if (!loggedUser.influencer){
+		    		loggedUser.influencer = {
+		    			name: "",
+		    			profile: "",
+		    			price: 30,
+		    			avatar: 'assets/avatarplaceholder.png',
+		    			banner: 'assets/bannerplaceholder.png'
+		    		}
+		    	}
 				$("#influencer-name-input").val(loggedUser.influencer.name)
 				$("#influencer-profile-input").val(loggedUser.influencer.profile)
 				$("#influencer-price-input").val(loggedUser.influencer.price)
@@ -401,7 +411,12 @@
 					var price = $("#influencer-price-input").val();
 					var avatar = $("#edit-avatar-img").attr('src');
 					var banner = $("#edit-banner-img").attr('src');
-					serverEditInfluencerProfile(name,profile,avatar,banner,price);
+					var edited = serverEditInfluencerProfile(name,profile,avatar,banner,price);
+					if (!edited){
+						serverBecomeInfluencer(name,profile,avatar,banner,price);
+						$("#become-influencer-btn").hide();
+                		$(".influencer-btn").show();
+					}
 					$("#edit-profile-modal").modal('hide');
 					setProfile(loggedUser.id)
 					

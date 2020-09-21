@@ -91,6 +91,8 @@ function serverBecomeInfluencer(name,profile,avatar,banner,price){
   } 
   users[currentUser].influencer = {
     profile: profile,
+    name: name,
+    id: currentUser,
     avatar: avatar,
     banner: banner,
     price: price,
