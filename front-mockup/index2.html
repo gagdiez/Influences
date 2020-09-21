@@ -1,0 +1,601 @@
+
+<!DOCTYPE html>
+	<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>NearFans &mdash; Discover, influence, pay your dues. </title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="NearFans is a social network on the blockchain." />
+	<meta name="keywords" content="blockchain, social network, siacoin, near, influencer" />
+	<meta name="author" content="luna y guille" />
+
+	
+
+  <!-- 
+	//////////////////////////////////////////////////////
+
+	FREE HTML5 TEMPLATE 
+	DESIGNED & DEVELOPED by FREEHTML5.CO
+		
+	Website: 		http://freehtml5.co/
+	Email: 			info@freehtml5.co
+	Twitter: 		http://twitter.com/fh5co
+	Facebook: 		https://www.facebook.com/fh5co
+
+	//////////////////////////////////////////////////////
+	 -->
+
+
+	<!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+	<link rel="shortcut icon" href="favicon.ico">
+
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" integrity="sha512-Velp0ebMKjcd9RiCoaHhLXkR1sFoCCWXNp6w4zj1hfMifYB5441C+sKeBl/T/Ka6NjBiRfBBQRaQq65ekYz3UQ==" crossorigin="anonymous" />
+
+	<!-- Our Custom CSS -->
+    <link rel="stylesheet" href="assets/style3.css">
+
+    <!-- Scrollbar Custom CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css">
+
+	</head>
+	<body>
+
+		<div class="overlay"></div>
+
+		<div id='logged-out'>
+			<section class="pt-0 pb-5 header text-center">
+	        	<img src="assets/login-banner.jpg" class="img-fluid">
+	            <h1 class="display-4">Welcome to NearFans</h1>
+	            <p class="font-italic text-muted mb-1">Login to find the most influential influencers on the blockchain.</p>
+	            <button type="button" class="btn btn-secondary btn-lg" id="login-btn" onclick="loginUser('influencerUser')">Login influencer</button>
+	            <button type="button" class="btn btn-secondary btn-lg" id="login-btn" onclick="loginUser('normalUser')">Login normal</button>
+			</section>
+		</div>
+
+		<div id='logged-in' style="display: none;">
+			
+					<!-- Sidebar  -->
+	        <nav id="sidebar">
+	            <div id="dismiss">
+	                <i class="fas fa-arrow-left"></i>
+	            </div>
+
+	            <div class="sidebar-header">
+	                <h3>NearFans</h3>
+	            </div>
+
+	            <ul class="list-unstyled components">
+	            	<li><a type="button" id="find-influencers-btn" class="nav-btn" href="#">Find influencers</a></li>
+	            	<li><a type="button" id="my-subs-btn" class="nav-btn" href="#">My subscriptions</a></li>
+	            </ul>
+
+	            <ul class="list-unstyled components">
+	                <li><a type="button" id="become-influencer-btn" class="nav-btn" href="#">Become an influencer</a></li>
+	                <li><a type="button" id="my-profile-btn" class="nav-btn influencer-btn" href="#">My profile</a></li>
+	                <li><a type="button" data-toggle="modal" data-target="#edit-profile-modal" class="nav-btn influencer-btn" href="#">Edit profile</a></li>
+	                <li><a type="button" data-toggle="modal" data-target="#add-content-modal" class="nav-btn influencer-btn" href="#">Add post</a></li>
+	            </ul>
+
+	            <ul class="list-unstyled components">
+	                <li><a type="button" id="logout-btn" class="nav-btn" href="#">Logout</a></li>
+	            </ul>
+
+	        </nav>
+
+	        <button type="button" id="sidebarCollapse" class="btn btn-dark" style="position: absolute; margin: 10px">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <section class="container" id="my-subs-banner">
+		        <div class="jumbotron bg-dark">
+				  <h1 class="display-4 text-white">Welcome <span class="logged-user-name"></span>!</h1>
+				  <p class="lead">This is what your favourite influencers have been up to.</p>
+				</div>
+			</section>
+
+            <section class="container" id="find-influencers">
+		        <div class="jumbotron bg-dark">
+				  <h1 class="display-4 text-white">Welcome <span class="logged-user-name"></span>!</h1>
+				  <p class="lead">Find influencers and become a fan.</p>
+				  <div class="form-group text-center mb-3">
+				  	<button class="btn btn-secondary btn-lg" type="button" id="see-featured-btn">Discover!</button>
+				  </div>
+				  <hr class="my-4">
+				  <p >Do you know exactly who you want? Find them and show them your support.</p>
+				  <div class="input-group">
+
+	   				<input type="text" class="form-control" id="influencerSearch" placeholder="find an influencer" >
+				    <div class="input-group-append">
+				       <button class="btn btn-secondary" type="button" id="search-influencers-btn">Search!</button>
+				    </div>
+				  </div>
+				</div>
+				<div id="search-results" style="display: none">
+					<h1>Search results</h1>
+					<div class="container text-center">
+				        <div class="gallery-wrapper search-gallery">
+				            <div class="grid-sizer col-lg-4 col-md-6"></div>
+				            
+				        </div>
+				    </div>
+				</div>
+				<div id="featured-influencers">
+					<h1>Featured Influencers</h1>
+					<div class="container text-center">
+				        <!-- Masonry grid -->
+				        <div class="gallery-wrapper featured-influencers">
+				            <!-- Grid sizer -->
+				            <div class="grid-sizer col-lg-4 col-md-6"></div>
+				            
+				        </div>
+				    </div>
+				</div>
+				
+			</section>
+
+			<section class="pt-0 pb-5 header text-center" id="influencer-profile">
+				
+	        	<img src="assets/avatars/bannergatinho.jpg" id="influencer-banner" class="img-fluid">
+	        	<div class="avatar">
+                    <img alt="" id="influencer-avatar" src="assets/avatars/gatinho.jpg">
+                </div>
+	            <h1 class="display-4 influencer-name">Gatinho</h1>
+	            <span class="badge badge-pill badge-dark">Followed by <span id="influencer-followers"></span> fans!</span>
+	            <p class="font-italic text-muted mb-1 influencer-description">Dame toda la guita, papi.</p>
+	            
+	            <button type="button" class="btn btn-secondary btn-lg subscribe-btn" target="influencerId">Subscribe!</button>
+				            
+			</section>
+
+			<div id="templates" class="d-none">
+				<div class="col-lg-4 col-md-6 grid-item mb-4 grid-content content-template">
+	            	<a href="assets/images/pic-1.jpg" class="main-content" data-toggle="lightbox">
+		                <img src="assets/images/pic-1.jpg" class="img-fluid w-100 mb-3 img-thumbnail shadow-sm rounded-0">
+		            </a>
+		            <div class="content-info">
+		            	<h2 class="h4 text-muted font-italic">Masonry grid item</h2>
+	                	<p class="small text-muted font-italic">Uploaded on</p>
+	                	<button class="btn btn-outline-secondary visit-influencer-btn">Visit Gatinho</button>
+	                	<button class="btn btn-outline-secondary remove-content-btn">Remove</button>
+		            </div>
+	            </div>
+
+				<div class="col-lg-4 col-md-6 grid-item mb-4 influencer-list-template">
+	                <img class="img-fluid w-100 mb-3 img-thumbnail shadow-sm rounded-0" src="assets/avatars/gatinho.jpg" alt="">
+	                <button class="btn btn-secondary influencer-link" target="influencerUser">Discover <span class="influencer-name">Gatinho</span></button>
+	            </div>
+			</div>
+
+			
+
+			<section class="pb-5" id="influencer-content">
+			    <div class="container text-center">
+			        <!-- Masonry grid -->
+			        <div class="gallery-wrapper content-gallery">
+			            <!-- Grid sizer -->
+			            <div class="grid-sizer col-lg-4 col-md-6"></div>
+			          
+			        </div>
+			    </div>
+			</section>
+
+			<div id="modals">
+				<div class="modal fade" id="edit-profile-modal" tabindex="-1" role="dialog">
+				  <div class="modal-dialog modal-lg" role="document">
+				    <div class="modal-content">
+				      <div class="modal-header">
+				        <h5 class="modal-title">Edit profile</h5>
+				        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				          <span aria-hidden="true">&times;</span>
+				        </button>
+				      </div>
+				      <div class="modal-body">
+				      	<button type="button" id="edit-banner-btn" class="btn  btn-icon btn-secondary" style="position: absolute; margin: 10px" onclick="document.getElementById('upload-banner-input').click();">
+			                <i class="fas fa-edit"></i>
+			            </button>
+			            
+				      	<img src="assets/avatars/bannergatinho.jpg" id="edit-banner-img" class="img-fluid">
+
+			        	<div class="avatar text-center">
+		                    <img alt="" src="assets/avatars/gatinho.jpg" id="edit-avatar-img">
+		                    <button type="button" id="edit-avatar-btn" class="btn btn-icon btn-secondary" onclick="document.getElementById('upload-avatar-input').click();">
+				                <i class="fas fa-edit"></i>
+				            </button>
+
+		                </div>
+		                <input id="upload-avatar-input" type="file" accept="image/*" name="upload-avatar" style="display: none;" />
+			            <input id="upload-banner-input" type="file" accept="image/*" name="upload-banner" style="display: none;" />
+				        <form>
+						  <div class="form-group">
+						    <label for="influencer-name-input">Influencer name</label>
+						    <input type="text" class="form-control" id="influencer-name-input" aria-describedby="nameHelp" placeholder="Enter your influencer name">
+						    <small id="nameHelp" class="form-text text-muted">Choose a name for people to find you.</small>
+						  </div>
+						  <div class="form-group">
+						    <label for="influencer-profile-input">Profile</label>
+						    <input type="text" class="form-control" id="influencer-profile-input" aria-describedby="profileHelp" placeholder="About myself...">
+						    <small id="profileHelp" class="form-text text-muted">Tell your fans something about yourself.</small>
+						  </div>
+						  <div class="form-group">
+						    <label for="influencer-price-input">Your fees</label>
+						    <input type="number" class="form-control" id="influencer-price-input" aria-describedby="priceHelp" placeholder="30">
+						    <small id="priceHelp" class="form-text text-muted">How much will you charge your fans monthly.</small>
+						  </div>
+						  
+						</form>
+				      </div>
+				      <div class="modal-footer">
+				        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				        <button type="button" class="btn btn-dark" id='edit-profile-save'>Save changes</button>
+				      </div>
+				    </div>
+				  </div>
+				</div>
+			</div>
+
+			<div class="modal fade" id="add-content-modal" tabindex="-1" role="dialog">
+				  <div class="modal-dialog modal-lg" role="document">
+				    <div class="modal-content">
+				      <div class="modal-header">
+				        <h5 class="modal-title">Add Content</h5>
+				        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				          <span aria-hidden="true">&times;</span>
+				        </button>
+				      </div>
+				      <div class="modal-body">
+				      	
+				      	<div class="text-center" >
+				      		<button class="btn btn-secondary btn-upload" onclick="document.getElementById('upload-content-input').click();">
+				      			<i class='fas fa-camera-retro'></i>
+				      		</button>
+				      		<img src="" id="upload-content-preview" class="content-preview" >
+					  	</div>
+					  	<input id="upload-content-input" type="file" accept="image/*" name="upload-content" style="display: none;" />
+						  	<!--  -->
+						  <div class="form-group mt-3">
+						    <input type="text" class="form-control" id="content-title-input" aria-describedby="captionHelp" placeholder="Caption...">
+						    <small id="captionHelp" class="form-text text-muted">Choose a caption that reflects the nature of the content.</small>
+						  </div>
+				      </div>
+				      <div class="modal-footer">
+				        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				        <button type="button" class="btn btn-dark" id='add-content-btn'>Add content</button>
+				      </div>
+				    </div>
+				  </div>
+				</div>
+			</div>
+			
+		</div>	
+
+
+	<!-- jQuery -->
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+	<!-- Bootstrap -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+
+	<script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/masonry/4.2.2/masonry.pkgd.min.js"></script>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js" integrity="sha512-Y2IiVZeaBwXG1wSV7f13plqlmFOx8MdjuHyYFVoYzhyRr3nH/NMDjTBSswijzADdNzMyWNetbLMfOpIPl6Cv9g==" crossorigin="anonymous"></script>
+
+	<!-- Font Awesome JS -->
+    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js" integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ" crossorigin="anonymous"></script>
+    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/fontawesome.js" integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY" crossorigin="anonymous"></script>
+
+    <!-- Popper.JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
+
+    <!-- jQuery Custom Scroller CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.concat.min.js"></script>
+
+    <script type="text/javascript" src="assets/server.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+        	function initiateGrid(gridClass){
+        		var $grid = $(gridClass).masonry({
+			        temSelector: '.grid-item',
+			        columnWidth: '.grid-sizer',
+			        percentPosition: true,
+			    });
+
+			    // Initate imagesLoaded
+			    $grid.imagesLoaded().progress( function() {
+			        $influencerGrid.masonry('layout');
+			    });
+			    return $grid;
+        	}
+
+
+
+        	var $influencerGrid = initiateGrid('.featured-influencers');
+		    var $contentGrid = initiateGrid('.content-gallery');
+		    var $searchGrid = initiateGrid('.search-gallery');
+
+		    
+		    // $(".upload-content").click(function(){
+		    // 	$('#upload-content-input').trigger('click');
+		    // })
+		    $("#upload-content-input").change(function() {
+			  if (this.files && this.files[0]) {
+			    var reader = new FileReader();
+			    
+			    reader.onload = function(e) {
+			      $('#upload-content-preview').attr('src', e.target.result);
+			      $('#upload-content-preview').show();
+			      $('.btn-upload').hide();
+			    }
+			    
+			    reader.readAsDataURL(this.files[0]); // convert to base64 string
+			  }
+			});
+
+			$("#upload-banner-input").change(function() {
+			  if (this.files && this.files[0]) {
+			    var reader = new FileReader();
+			    
+			    reader.onload = function(e) {
+			      $('#edit-banner-img').attr('src', e.target.result);
+			    }
+			    
+			    reader.readAsDataURL(this.files[0]); // convert to base64 string
+			  }
+			});
+
+			$("#upload-avatar-input").change(function() {
+			  if (this.files && this.files[0]) {
+			    var reader = new FileReader();
+			    
+			    reader.onload = function(e) {
+			      $('#edit-avatar-img').attr('src', e.target.result);
+			    }
+			    
+			    reader.readAsDataURL(this.files[0]); // convert to base64 string
+			  }
+			});
+
+			
+			$("#add-content-btn").click(function(){
+				$("#add-content-modal").modal('hide');
+				var img = $('#upload-content-preview').attr('src');
+				// should upload to sia
+				serverAddContent(img,$("#content-title-input").val());
+				setProfile(loggedUser.id)
+			});
+
+			$("#add-content-modal").on("shown.bs.modal", function () { 
+				$('#upload-content-preview').hide();
+		        $('.btn-upload').show();
+		        $("#upload-content-input").val('');
+			})
+
+		    $("#search-influencers-btn").click(function(){
+		    	var partialName = $('#influencerSearch').val();
+		    	var influencers = serverFindInfluencers(partialName);
+    			setInfluencersList(influencers,'found-influencer',$searchGrid);
+
+    			$("#search-results").show();
+    			$("#featured-influencers").hide();
+		    })
+
+		    $("#see-featured-btn").click(function(){
+		    	$("#search-results").hide();
+    			$("#featured-influencers").show();
+		    })
+
+		    $("#edit-profile-modal").on("shown.bs.modal", function () { 
+		    	// set profile to edit
+				$("#influencer-name-input").val(loggedUser.influencer.name)
+				$("#influencer-profile-input").val(loggedUser.influencer.profile)
+				$("#influencer-price-input").val(loggedUser.influencer.price)
+				$("#edit-avatar-img").attr('src',loggedUser.influencer.avatar)
+				$("#edit-banner-img").attr('src',loggedUser.influencer.banner)
+				$("#edit-profile-save").click(function(){
+					// choose file
+					var name = $("#influencer-name-input").val();
+					var profile = $("#influencer-profile-input").val();
+					var price = $("#influencer-price-input").val();
+					var avatar = $("#edit-avatar-img").attr('src');
+					var banner = $("#edit-banner-img").attr('src');
+					serverEditInfluencerProfile(name,profile,avatar,banner,price);
+					$("#edit-profile-modal").modal('hide');
+					setProfile(loggedUser.id)
+					
+				})
+			});
+
+        	function setSubsSection() {
+        		var content = serverGetSubscribedContent();
+        		if (!content.length){
+        			return findInfluencersSection();
+        		}
+        		$("#find-influencers").hide();
+        		$("#influencer-profile").hide();
+        		$("#my-subs-banner").show();
+        		loadContent(content,false);
+        	}
+
+        	function findInfluencersSection() {
+        		$("#influencer-profile").hide();
+    			$("#influencer-content").hide();
+    			$("#search-results").hide();
+    			$("#my-subs-banner").hide();
+    			$("#find-influencers").show();
+    			var featured = serverGetFeatured();
+    			$("#featured-influencers").show();
+    			setInfluencersList(featured,'featured-influencer',$influencerGrid)
+        	}
+
+        	function setInfluencersList(influencers,section,$grid){
+        		$(`.${section}`).remove()
+    			influencers.forEach(f=>{
+    				var inf = $('.influencer-list-template').clone();
+    				inf.find('img').attr('src',f.avatar)
+    				inf.find('.influencer-link').attr('target',f.id);
+    				inf.find('.influencer-name').html(f.name);
+    				inf.removeClass('influencer-list-template');
+    				inf.addClass(section);
+    				$grid.append(inf).masonry( 'appended', inf ).masonry();
+    			})
+    			$(".influencer-link").click(function(){
+    				var influencer = $(this).attr('target');
+    				setProfile(influencer);
+    			})
+        	}
+
+        	function setProfile(name) {
+        		$("#find-influencers").hide();
+        		$("#my-subs-banner").hide();
+        		var influencerProfile = serverGetInfluencer(name)
+        		$(".influencer-name").html(influencerProfile.name);
+        		$(".influencer-description").html(influencerProfile.profile);
+        		$("#influencer-followers").html(influencerProfile.followers);
+        		$("#influencer-avatar").attr('src',influencerProfile.avatar);
+        		$("#influencer-banner").attr('src',influencerProfile.banner);
+        		$("#influencer-profile").show();
+        		var content = serverGetContentFrom(name);
+        		$(".subscribe-btn").toggle(!serverIsSubscribed(name));
+        		$(".subscribe-btn").attr('target',influencerProfile.id);
+        		$(".subscribe-btn").html(`Subscribe for ${influencerProfile.price}(N) per month`);
+        		if (!content.length){
+        			$("#influencer-content").hide();
+        		} else {
+        			loadContent(content,true);
+        		}
+        	}
+
+        	function loadContent(content,inProfile) {
+        		$(".single-content").remove();
+        		$("#influencer-content").show();
+        		content.forEach(c=>showContent(c,inProfile));
+			    
+        	}
+
+        	function showContent(content,inProfile) {
+        		var newContent = $(".content-template").clone();
+        		newContent.find('.main-content').attr('href',content.image);
+        		newContent.find('img').attr('src',content.image);
+        		newContent.find('h2').html(content.title);
+        		newContent.find('.small').html("Uploaded on "+content.creationDate.toDateString());
+        		if (!inProfile){
+        			newContent.find('.visit-influencer-btn').attr('target',content.owner.id);
+        			newContent.find('.visit-influencer-btn').html("Visit "+content.owner.name);
+        			newContent.find('.remove-content-btn').remove();
+        			newContent.find('.visit-influencer-btn').click(function(){
+        				var target = $(this).attr('target');
+        				setProfile(target);
+        			});
+        		} else {
+        			newContent.find('.visit-influencer-btn').remove();
+        			if (content.owner.id != loggedUser.id){
+        				newContent.find('.remove-content-btn').remove();
+        			} else {
+        				newContent.find('.remove-content-btn').attr('target',content.id);
+        				newContent.find('.remove-content-btn').click(function(){
+	        				var target = $(this).attr('target');
+	        				serverRemoveContent(target)
+	        				setProfile(loggedUser.id);
+	        			});
+        			}
+        		}
+        		
+        		newContent.addClass("single-content");
+        		newContent.removeClass("content-template");
+        		newContent.removeClass("d-none");
+        		$contentGrid.append(newContent).masonry( 'appended', newContent ).masonry();
+        	}
+
+        	function loggedInProcess(argument) {
+        		$("#logged-out").hide();
+                $("#logged-in").show();
+                $(".logged-user-name").html(loggedUser.name);
+
+                if (loggedUser.influencer) {
+                	setProfile(loggedUser.id);
+                	$("#become-influencer-btn").hide();
+                	$(".influencer-btn").show();
+                } else {
+                	$("#become-influencer-btn").show();
+                	$(".influencer-btn").hide();
+                	if (loggedUser.subs.length){
+                		setSubsSection()
+                	} else {
+                		findInfluencersSection();
+                	}
+                }
+
+	            $("#sidebar").mCustomScrollbar({
+	                theme: "minimal"
+	            });
+
+	            $('#dismiss, .overlay, .nav-btn').on('click', function () {
+	                $('#sidebar').removeClass('active');
+	                $('.overlay').removeClass('active');
+	            });
+
+	            $('#sidebarCollapse').on('click', function () {
+	                $('#sidebar').addClass('active');
+	                $('.overlay').addClass('active');
+	                $('.collapse.in').toggleClass('in');
+	                $('a[aria-expanded=true]').attr('aria-expanded', 'false');
+	            });
+
+	            $(document).on('click', '[data-toggle="lightbox"]', function(event) {
+	                event.preventDefault();
+	                $(this).ekkoLightbox();
+	            });
+
+	            $(".subscribe-btn").click(function(){
+        			var target = $(this).attr('target');
+        			if (serverSubscribe(target)) {
+        				setProfile(target);
+        			}
+        		})
+
+	            $('#my-subs-btn').on('click', function () {
+	                setSubsSection()
+	            });
+
+	            $('#logout-btn').on('click', function () {
+	                loggedIn = false;
+	                $("#logged-in").hide();
+	                $("#logged-out").show();
+	            });
+
+	            $('#find-influencers-btn').on('click', function () {
+	                findInfluencersSection()
+	            });
+
+	            $('#my-profile-btn').on('click', function () {
+	                setProfile(loggedUser.id);
+	            });
+        	}
+        	
+        	// $('#login-btn').on('click', function () {
+                
+         //    });
+
+            window.loginUser = function(name) {
+            	loggedUser = serverLogin(name);
+                loggedInProcess();
+            }
+
+            if (serverIsLoggedIn()){
+            	loggedUser = serverGetLoggedInUser();
+        		loggedInProcess();
+        	}
+
+		    
+
+        });
+    </script>
+
+
+
+	
+	</body>
+</html>
