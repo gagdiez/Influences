@@ -41,7 +41,6 @@ var users = {
     subs:[]
   },
 	normalUser: {
-		name: "Wanker",
 		influencer: false,
 		subs: ['influencerUser']
 	}
