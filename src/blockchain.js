@@ -41,10 +41,12 @@ export async function initNEAR() {
 
 // CONTENT
 export async function hasAccessTo(influencer){
+  // Returns true if the user is subscribed to the influencer
   return await contract.hasAccessTo({influencer})
 }
 
 export async function subscribeTo(influencer, money_amount){
+  // OPENS another webpage to pay
   let amount = utils.format.parseNearAmount(money_amount.toString())
   let account = window.walletConnection.account()
   account.functionCall(nearConfig.contractName, 'subscribeTo',
@@ -52,25 +54,30 @@ export async function subscribeTo(influencer, money_amount){
 }
 
 export async function getContentOf(influencer){
+  // Returns a list of {sialink:str, creationDate:int, description:str)}
   return await contract.getContentOf({influencer})
 }
 
 export async function addToMyContent(sialink){
+  // Returns true if everything goes right  
   return await contract.addToMyContent({sialink})
 }
 
 export async function deleteFromMyContent(sialink){
+  // Returns true if everything goes right  
   return await contract.deleteFromMyContent({sialink})
 }
 
-// PROFILE name:string, public banner:string, public avatar: string,
+// PROFILE
 export async function updateMyProfile(name, banner, avatar, description, price){
+  // Returns true if everything goes right
   price = utils.format.parseNearAmount(price)
   return await contract.updateMyProfile({name, banner, avatar,
                                          description, price})
 }
 
 export async function getProfileOf(influencer){
+  // Returns NULL or {name:str, banner:str, avatar:str, description:str, price:str, fans:int}
   let profile = await contract.getProfileOf({influencer})
   if(!profile){console.error("Profile does not exist"); return;}
   profile.price = utils.format.formatNearAmount(profile.price).toString()
@@ -79,6 +86,7 @@ export async function getProfileOf(influencer){
 }
 
 export async function getMyInfluencers(){
+  // Returns a list of strings (representing each influencer-id)
   return await contract.getMyInfluencers()
 }
 
