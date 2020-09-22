@@ -286,8 +286,8 @@ window.subscribeToInfluencer = async function(){
 // PAGE NAVIGATION
 // ------------------------------------------------------
 
-window.showSubscriptionContent = function showSubscriptionContent() {
-	var subs = getMyInfluencers();
+window.showSubscriptionContent = async function showSubscriptionContent() {
+	var subs = await getMyInfluencers();
 	if (!subs.length){
 		return showFindInfluencers();
 	}
@@ -295,12 +295,18 @@ window.showSubscriptionContent = function showSubscriptionContent() {
 	$("#influencer-profile").hide();
 	$("#my-subs-banner").show();
 	let content = [];
-	subs.forEach(influencer=>{
-		var influencerContent = getContentOf(influencer)
-		content.push(influencerContent.map(post=>{return {owner:influencer, ...post}}))
+	subs.forEach(influencer=>{content.push(getContentOf(influencer))});
+	console.log(subs)
+	console.log(content)
+	Promise.all(content).then(subsContent => {
+		console.log(subsContent);
+		var allContent = [];
+		subsContent.forEach((posts,index)=>{
+			allContent = allContent.concat(addOwner(posts, subs[index]))
+		})
+		allContent.sort((c1,c2) => c1.creationDate > c2.creationDate)
+		showContentInGrid(allContent,false);
 	})
-	content.sort((c1,c2) => c1.creationDate > c2.creationDate)
-	showContentInGrid(content,false);
 }
 
 window.showFindInfluencers = function showFindInfluencers() {
@@ -373,18 +379,17 @@ window.showProfile = async function showProfile(influencerId,influencerProfile) 
 			$('#loading-influencer-content').html(`${influencerProfile.name} doesn't have any content yet!`)
 		} else {
 			$('#loading-influencer-content').hide();
-			showContentInGrid(addOwner(content,influencerId,influencerProfile.name),true);
+			showContentInGrid(addOwner(content,influencerId),true);
 		}
 	}
-
-	
 }
 
-function addOwner(content, id,name){
-	return content.map(c=>{return {owner:{id,name},...c} })
+function addOwner(content, id){
+	return content.map(c=>{return {owner:id,...c} })
 }
 
 function showContentInGrid(content,inProfile) {
+	console.log(content)
 	$(".single-content").remove();
 	$("#influencer-content").show();
 	content.forEach(c=>showSingleContent(c,inProfile));
@@ -399,8 +404,8 @@ function showSingleContent(content,inProfile) {
 	let date = new Date(content.creationDate/1000000)
 	newContent.find('.small').html("Uploaded on "+date.toDateString());
 	if (!inProfile){
-		newContent.find('.visit-influencer-btn').attr('target',content.owner.id);
-		newContent.find('.visit-influencer-btn').html("Visit "+content.owner.name);
+		newContent.find('.visit-influencer-btn').attr('target',content.owner);
+		newContent.find('.visit-influencer-btn').html("Visit "+content.owner);
 		newContent.find('.remove-content-btn').remove();
 		newContent.find('.visit-influencer-btn').click(async function(){
 			var target = $(this).attr('target');
@@ -409,7 +414,7 @@ function showSingleContent(content,inProfile) {
 		});
 	} else {
 		newContent.find('.visit-influencer-btn').remove();
-		if (content.owner.id != accountId){
+		if (content.owner != accountId){
 			newContent.find('.remove-content-btn').remove();
 		} else {
 			newContent.find('.remove-content-btn').attr('target',content.sialink);

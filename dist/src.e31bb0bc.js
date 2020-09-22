@@ -22688,19 +22688,20 @@ function _getContentOf() {
   return _getContentOf.apply(this, arguments);
 }
 
-function addToMyContent(_x5) {
+function addToMyContent(_x5, _x6) {
   return _addToMyContent.apply(this, arguments);
 }
 
 function _addToMyContent() {
-  _addToMyContent = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee5(sialink) {
+  _addToMyContent = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee5(sialink, description) {
     return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
         switch (_context5.prev = _context5.next) {
           case 0:
             _context5.next = 2;
             return contract.addToMyContent({
-              sialink: sialink
+              sialink: sialink,
+              description: description
             });
 
           case 2:
@@ -22716,7 +22717,7 @@ function _addToMyContent() {
   return _addToMyContent.apply(this, arguments);
 }
 
-function deleteFromMyContent(_x6) {
+function deleteFromMyContent(_x7) {
   return _deleteFromMyContent.apply(this, arguments);
 } // PROFILE
 
@@ -22745,7 +22746,7 @@ function _deleteFromMyContent() {
   return _deleteFromMyContent.apply(this, arguments);
 }
 
-function updateMyProfile(_x7, _x8, _x9, _x10, _x11) {
+function updateMyProfile(_x8, _x9, _x10, _x11, _x12) {
   return _updateMyProfile.apply(this, arguments);
 }
 
@@ -22779,7 +22780,7 @@ function _updateMyProfile() {
   return _updateMyProfile.apply(this, arguments);
 }
 
-function getProfileOf(_x12) {
+function getProfileOf(_x13) {
   return _getProfileOf.apply(this, arguments);
 }
 
@@ -22858,7 +22859,7 @@ function generateUUID() {
   return uuid;
 }
 
-function upload_file_to_sia(_x13) {
+function upload_file_to_sia(_x14) {
   return _upload_file_to_sia.apply(this, arguments);
 }
 
@@ -23130,19 +23131,19 @@ function loginFlow() {
 }
 
 function _loginFlow() {
-  _loginFlow = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee9() {
-    return regeneratorRuntime.wrap(function _callee9$(_context9) {
+  _loginFlow = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee10() {
+    return regeneratorRuntime.wrap(function _callee10$(_context10) {
       while (1) {
-        switch (_context9.prev = _context9.next) {
+        switch (_context10.prev = _context10.next) {
           case 0:
             $("#logged-out").hide();
             $("#logged-in").show();
             $(".logged-user-name").html(accountId);
-            _context9.next = 5;
+            _context10.next = 5;
             return (0, _blockchain.getProfileOf)(accountId);
 
           case 5:
-            window.accountProfile = _context9.sent;
+            window.accountProfile = _context10.sent;
 
             if (accountProfile) {
               // is influencer, main page is profile
@@ -23158,10 +23159,10 @@ function _loginFlow() {
 
           case 7:
           case "end":
-            return _context9.stop();
+            return _context10.stop();
         }
       }
-    }, _callee9);
+    }, _callee10);
   }));
   return _loginFlow.apply(this, arguments);
 }
@@ -23274,30 +23275,62 @@ window.subscribeToInfluencer = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/rege
 // PAGE NAVIGATION
 // ------------------------------------------------------
 
-window.showSubscriptionContent = function showSubscriptionContent() {
-  var subs = (0, _blockchain.getMyInfluencers)();
+window.showSubscriptionContent = /*#__PURE__*/function () {
+  var _showSubscriptionContent = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee6() {
+    var subs, content;
+    return regeneratorRuntime.wrap(function _callee6$(_context6) {
+      while (1) {
+        switch (_context6.prev = _context6.next) {
+          case 0:
+            _context6.next = 2;
+            return (0, _blockchain.getMyInfluencers)();
 
-  if (!subs.length) {
-    return showFindInfluencers();
+          case 2:
+            subs = _context6.sent;
+
+            if (subs.length) {
+              _context6.next = 5;
+              break;
+            }
+
+            return _context6.abrupt("return", showFindInfluencers());
+
+          case 5:
+            $("#find-influencers").hide();
+            $("#influencer-profile").hide();
+            $("#my-subs-banner").show();
+            content = [];
+            subs.forEach(function (influencer) {
+              content.push((0, _blockchain.getContentOf)(influencer));
+            });
+            console.log(subs);
+            console.log(content);
+            Promise.all(content).then(function (subsContent) {
+              console.log(subsContent);
+              var allContent = [];
+              subsContent.forEach(function (posts, index) {
+                allContent = allContent.concat(addOwner(posts, subs[index]));
+              });
+              allContent.sort(function (c1, c2) {
+                return c1.creationDate > c2.creationDate;
+              });
+              showContentInGrid(allContent, false);
+            });
+
+          case 13:
+          case "end":
+            return _context6.stop();
+        }
+      }
+    }, _callee6);
+  }));
+
+  function showSubscriptionContent() {
+    return _showSubscriptionContent.apply(this, arguments);
   }
 
-  $("#find-influencers").hide();
-  $("#influencer-profile").hide();
-  $("#my-subs-banner").show();
-  var content = [];
-  subs.forEach(function (influencer) {
-    var influencerContent = (0, _blockchain.getContentOf)(influencer);
-    content.push(influencerContent.map(function (post) {
-      return _objectSpread({
-        owner: influencer
-      }, post);
-    }));
-  });
-  content.sort(function (c1, c2) {
-    return c1.creationDate > c2.creationDate;
-  });
-  showContentInGrid(content, false);
-};
+  return showSubscriptionContent;
+}();
 
 window.showFindInfluencers = function showFindInfluencers() {
   $("#influencer-profile").hide();
@@ -23324,35 +23357,35 @@ function setInfluencersList(influencers, section, $grid) {
     inf.addClass(section);
     $grid.append(inf).masonry('appended', inf).masonry();
   });
-  $(".influencer-link").click( /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee6() {
+  $(".influencer-link").click( /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee7() {
     var influencer, influencerProfile;
-    return regeneratorRuntime.wrap(function _callee6$(_context6) {
+    return regeneratorRuntime.wrap(function _callee7$(_context7) {
       while (1) {
-        switch (_context6.prev = _context6.next) {
+        switch (_context7.prev = _context7.next) {
           case 0:
             influencer = $(this).attr('target');
-            _context6.next = 3;
+            _context7.next = 3;
             return (0, _blockchain.getProfileOf)(influencer);
 
           case 3:
-            influencerProfile = _context6.sent;
+            influencerProfile = _context7.sent;
             showProfile(influencer, influencerProfile);
 
           case 5:
           case "end":
-            return _context6.stop();
+            return _context7.stop();
         }
       }
-    }, _callee6, this);
+    }, _callee7, this);
   })));
 }
 
 window.showProfile = /*#__PURE__*/function () {
-  var _showProfile = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee7(influencerId, influencerProfile) {
+  var _showProfile = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee8(influencerId, influencerProfile) {
     var hasAcces, content;
-    return regeneratorRuntime.wrap(function _callee7$(_context7) {
+    return regeneratorRuntime.wrap(function _callee8$(_context8) {
       while (1) {
-        switch (_context7.prev = _context7.next) {
+        switch (_context8.prev = _context8.next) {
           case 0:
             if (!influencerId) {
               influencerId = accountId;
@@ -23366,7 +23399,7 @@ window.showProfile = /*#__PURE__*/function () {
             $("#influencer-followers").html(influencerProfile.fans);
             $("#influencer-avatar").attr('src', influencerProfile.avatar);
             $("#influencer-banner").attr('src', influencerProfile.banner);
-            $(".subscribe-btn").attr('target', influencerProfile.id);
+            $(".subscribe-btn").attr('target', influencerId);
             $(".subscribe-btn").attr('price', influencerProfile.price);
             $(".subscribe-btn").html("Subscribe for ".concat(influencerProfile.price, "(N) per month to see all the content!"));
             $(".subscribe-btn").hide();
@@ -23375,43 +23408,43 @@ window.showProfile = /*#__PURE__*/function () {
             $('#loading-influencer-content').show();
             $('#loading-influencer-content').html("Loading content... " + spinner);
             $("#influencer-profile").show();
-            _context7.next = 19;
+            _context8.next = 19;
             return (0, _blockchain.hasAccessTo)(influencerId);
 
           case 19:
-            hasAcces = _context7.sent;
+            hasAcces = _context8.sent;
 
             if (hasAcces) {
-              _context7.next = 25;
+              _context8.next = 25;
               break;
             }
 
             $(".subscribe-btn").show();
             $("#influencer-content").hide();
-            _context7.next = 29;
+            _context8.next = 29;
             break;
 
           case 25:
-            _context7.next = 27;
+            _context8.next = 27;
             return (0, _blockchain.getContentOf)(influencerId);
 
           case 27:
-            content = _context7.sent;
+            content = _context8.sent;
 
             if (!content.length) {
               $("#influencer-content").hide();
               $('#loading-influencer-content').html("".concat(influencerProfile.name, " doesn't have any content yet!"));
             } else {
               $('#loading-influencer-content').hide();
-              showContentInGrid(addOwner(content, influencerId, influencerProfile.name), true);
+              showContentInGrid(addOwner(content, influencerId), true);
             }
 
           case 29:
           case "end":
-            return _context7.stop();
+            return _context8.stop();
         }
       }
-    }, _callee7);
+    }, _callee8);
   }));
 
   function showProfile(_x2, _x3) {
@@ -23421,18 +23454,16 @@ window.showProfile = /*#__PURE__*/function () {
   return showProfile;
 }();
 
-function addOwner(content, id, name) {
+function addOwner(content, id) {
   return content.map(function (c) {
     return _objectSpread({
-      owner: {
-        id: id,
-        name: name
-      }
+      owner: id
     }, c);
   });
 }
 
 function showContentInGrid(content, inProfile) {
+  console.log(content);
   $(".single-content").remove();
   $("#influencer-content").show();
   content.forEach(function (c) {
@@ -23449,34 +23480,34 @@ function showSingleContent(content, inProfile) {
   newContent.find('.small').html("Uploaded on " + date.toDateString());
 
   if (!inProfile) {
-    newContent.find('.visit-influencer-btn').attr('target', content.owner.id);
-    newContent.find('.visit-influencer-btn').html("Visit " + content.owner.name);
+    newContent.find('.visit-influencer-btn').attr('target', content.owner);
+    newContent.find('.visit-influencer-btn').html("Visit " + content.owner);
     newContent.find('.remove-content-btn').remove();
-    newContent.find('.visit-influencer-btn').click( /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee8() {
+    newContent.find('.visit-influencer-btn').click( /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee9() {
       var target, influencerProfile;
-      return regeneratorRuntime.wrap(function _callee8$(_context8) {
+      return regeneratorRuntime.wrap(function _callee9$(_context9) {
         while (1) {
-          switch (_context8.prev = _context8.next) {
+          switch (_context9.prev = _context9.next) {
             case 0:
               target = $(this).attr('target');
-              _context8.next = 3;
+              _context9.next = 3;
               return (0, _blockchain.getProfileOf)(target);
 
             case 3:
-              influencerProfile = _context8.sent;
+              influencerProfile = _context9.sent;
               showProfile(target, influencerProfile);
 
             case 5:
             case "end":
-              return _context8.stop();
+              return _context9.stop();
           }
         }
-      }, _callee8, this);
+      }, _callee9, this);
     })));
   } else {
     newContent.find('.visit-influencer-btn').remove();
 
-    if (content.owner.id != accountId) {
+    if (content.owner != accountId) {
       newContent.find('.remove-content-btn').remove();
     } else {
       newContent.find('.remove-content-btn').attr('target', content.sialink);
@@ -23522,7 +23553,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "35255" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "40741" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
