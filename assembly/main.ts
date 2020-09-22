@@ -17,9 +17,9 @@ export function hasAccessTo(influencer:string): bool{
   let when:u64 = subscribed.getSome(key)
   let now:u64 = env.block_timestamp()
   let one_month: u64 = 2592000000000000
-  let one_minute: u64 = 60000000000
+  //let one_minute: u64 = 60000000000
 
-  if (now - when < one_minute){ return true }
+  if (now - when < one_month){ return true }
 
   return false
 }
