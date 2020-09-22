@@ -50,7 +50,7 @@ export async function subscribeTo(influencer, money_amount){
   let amount = utils.format.parseNearAmount(money_amount.toString())
   let account = window.walletConnection.account()
   account.functionCall(nearConfig.contractName, 'subscribeTo',
-  					   {influencer}, 0, amount)
+               {influencer}, 0, amount)
 }
 
 export async function getContentOf(influencer){

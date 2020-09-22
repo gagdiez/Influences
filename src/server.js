@@ -1,7 +1,8 @@
 var currentUser = null;
 var users = {
-	influencerUser: {
+	'gatinho.testnet': {
 		name: "Gatinho",
+    // surround frame inner benefit car replace neglect path vintage approve cause vacuum 
 		influencer: {
       id: 'influencerUser',
       name: "Gatinho",
@@ -21,7 +22,7 @@ var users = {
 		},
 		subs:[],
 	},
-  monomarron: {
+  'lunafromthemoon.testnet': {
     name: "El Mono Marron",
     influencer: {
       profile: 'Asdf qwer ',
@@ -40,39 +41,40 @@ var users = {
     },
     subs:[]
   },
-	normalUser: {
+	'wanker.testnet': {
+    // memory under outdoor foster tuition result plug song toast math sun solution 
 		influencer: false,
-		subs: ['influencerUser']
+		subs: ['lunafromthemoon.testnet']
 	}
 }
 
 var contentCounter = 11;
 
-function serverIsLoggedIn(){
+export function serverIsLoggedIn(){
   return currentUser!=null;
 }
 
-function serverGetLoggedInUser(){
+export function serverGetLoggedInUser(){
   return {id:currentUser, ...users[currentUser]}
 }
 
-function serverLogin(userId){
+export function serverLogin(userId){
   currentUser = userId;
   return {id:userId, ...users[currentUser]}
 }
 
-function serverGetFeatured(){
+export function serverGetFeatured(){
   return [users.influencerUser.influencer,users.monomarron.influencer]
 }
 
-function serverFindInfluencers(partialName){
+export function serverFindInfluencers(partialName){
   return Object.values(users).filter(user=>{
     return user.influencer && user.influencer.name.toLowerCase().includes(partialName.toLowerCase());
   }).map(user=> user.influencer)
 
 }
 
-function serverEditInfluencerProfile(name,profile,avatar,banner,price){
+export function serverEditInfluencerProfile(name,profile,avatar,banner,price){
   if (!users[currentUser] || users[currentUser].influencer==false){
     return false;
   } 
@@ -84,7 +86,7 @@ function serverEditInfluencerProfile(name,profile,avatar,banner,price){
   return true;
 }
 
-function serverBecomeInfluencer(name,profile,avatar,banner,price){
+export function serverBecomeInfluencer(name,profile,avatar,banner,price){
   if (!users[currentUser]){
     users[currentUser] = {name: name, id:currentUser, subs: [], };
   } 
@@ -100,7 +102,7 @@ function serverBecomeInfluencer(name,profile,avatar,banner,price){
   }
 }
 
-function serverSubscribe(userId){
+export function serverSubscribe(userId,price){
   if (!users[userId].influencer){
     return false;
   } 
@@ -113,7 +115,7 @@ function serverSubscribe(userId){
   return true;
 }
 
-function serverAddContent(image,title){
+export function serverAddContent(image,title){
   if (!users[currentUser] || !users[currentUser].influencer) {
     return false;
   }
@@ -122,7 +124,7 @@ function serverAddContent(image,title){
   return true;
 }
 
-function serverRemoveContent(contentId){
+export function serverRemoveContent(contentId){
   if (!(users[currentUser] && users[currentUser].influencer)) {
     return false;
   }
@@ -130,13 +132,13 @@ function serverRemoveContent(contentId){
   return true;
 }
 
-function serverGetInfluencer(userId){
+export function serverGetInfluencer(userId){
   if (users[userId] && users[userId].influencer){
     return users[userId].influencer;
   }
 }
 
-function serverGetContentFrom(userId){
+export function serverGetContentFrom(userId){
   if (users[userId] && users[userId].influencer){
     if (serverIsSubscribed(userId)){
       return users[userId].influencer.content.map(c=>{return {...c,owner:{id:userId}}});
@@ -145,11 +147,11 @@ function serverGetContentFrom(userId){
   return [];
 }
 
-function serverIsSubscribed(userId){
+export function serverIsSubscribed(userId){
   return (userId == currentUser || users[currentUser].subs.includes(userId))
 }
 
-function serverGetSubscribedContent(){
+export function serverGetSubscribedContent(){
   if (!users[currentUser] || users[currentUser].subs.length==0) {
     return []
   }

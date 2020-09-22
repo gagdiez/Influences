@@ -22517,60 +22517,28 @@ function getConfig(env) {
         helperUrl: 'https://helper.testnet.near.org',
         explorerUrl: 'https://explorer.testnet.near.org'
       };
-
-    case 'betanet':
-      return {
-        networkId: 'betanet',
-        nodeUrl: 'https://rpc.betanet.near.org',
-        contractName: CONTRACT_NAME,
-        walletUrl: 'https://wallet.betanet.near.org',
-        helperUrl: 'https://helper.betanet.near.org',
-        explorerUrl: 'https://explorer.betanet.near.org'
-      };
-
-    case 'local':
-      return {
-        networkId: 'local',
-        nodeUrl: 'http://localhost:3030',
-        keyPath: "".concat("/home/luna", "/.near/validator_key.json"),
-        walletUrl: 'http://localhost:4000/wallet',
-        contractName: CONTRACT_NAME
-      };
-
-    case 'test':
-    case 'ci':
-      return {
-        networkId: 'shared-test',
-        nodeUrl: 'https://rpc.ci-testnet.near.org',
-        contractName: CONTRACT_NAME,
-        masterAccount: 'test.near'
-      };
-
-    case 'ci-betanet':
-      return {
-        networkId: 'shared-test-staging',
-        nodeUrl: 'https://rpc.ci-betanet.near.org',
-        contractName: CONTRACT_NAME,
-        masterAccount: 'test.near'
-      };
-
-    default:
-      throw Error("Unconfigured environment '".concat(env, "'. Can be configured in src/config.js."));
   }
 }
 
 module.exports = getConfig;
-},{}],"utils.js":[function(require,module,exports) {
+},{}],"blockchain.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.initContract = initContract;
-exports.logout = logout;
 exports.login = login;
-exports.pay50 = pay50;
-exports.pay200 = pay200;
+exports.logout = logout;
+exports.initNEAR = initNEAR;
+exports.hasAccessTo = hasAccessTo;
+exports.subscribeTo = subscribeTo;
+exports.getContentOf = getContentOf;
+exports.addToMyContent = addToMyContent;
+exports.deleteFromMyContent = deleteFromMyContent;
+exports.updateMyProfile = updateMyProfile;
+exports.getProfileOf = getProfileOf;
+exports.getMyInfluencers = getMyInfluencers;
+exports.upload_file_to_sia = upload_file_to_sia;
 
 var _nearApiJs = require("near-api-js");
 
@@ -22582,14 +22550,25 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
-var nearConfig = (0, _config.default)("development" || 'development'); // Initialize contract & set global variables
+var nearConfig = (0, _config.default)('development'); // ===== API =====
 
-function initContract() {
-  return _initContract.apply(this, arguments);
+function login() {
+  window.walletConnection.requestSignIn(nearConfig.contractName);
 }
 
-function _initContract() {
-  _initContract = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+function logout() {
+  window.walletConnection.signOut(); // reload page
+
+  window.location.replace(window.location.origin + window.location.pathname);
+}
+
+function initNEAR() {
+  return _initNEAR.apply(this, arguments);
+} // CONTENT
+
+
+function _initNEAR() {
+  _initNEAR = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
     var near;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
@@ -22604,144 +22583,918 @@ function _initContract() {
 
           case 2:
             near = _context.sent;
-            // Initializing Wallet based Account. It can work with NEAR testnet wallet that
-            // is hosted at https://wallet.testnet.near.org
-            window.walletConnection = new _nearApiJs.WalletConnection(near); // Getting the Account ID. If still unauthorized, it's just empty string
+            // Initializing Wallet based Account
+            window.walletConnection = new _nearApiJs.WalletConnection(near); // Getting the Account ID
 
-            window.accountId = window.walletConnection.getAccountId(); // Initializing our contract APIs by contract name and configuration
+            window.accountId = window.walletConnection.getAccountId(); // Initializing contract APIs
 
-            _context.next = 7;
-            return new _nearApiJs.Contract(window.walletConnection.account(), nearConfig.contractName, {
-              // View methods are read only. They don't modify the state, but usually return some value.
-              viewMethods: [],
-              // Change methods can modify the state. But you don't receive the returned value when called.
-              changeMethods: ['hasAccess', 'getAccess']
+            window.contract = new _nearApiJs.Contract(window.walletConnection.account(), nearConfig.contractName, {
+              viewMethods: ['getProfileOf'],
+              changeMethods: ['hasAccessTo', 'getContentOf', 'subscribeTo', 'getMyInfluencers', 'addToMyContent', 'deleteFromMyContent', 'updateMyProfile']
             });
+            return _context.abrupt("return", walletConnection.isSignedIn());
 
           case 7:
-            window.contract = _context.sent;
-
-          case 8:
           case "end":
             return _context.stop();
         }
       }
     }, _callee);
   }));
-  return _initContract.apply(this, arguments);
+  return _initNEAR.apply(this, arguments);
 }
 
-function logout() {
-  window.walletConnection.signOut(); // reload page
-
-  window.location.replace(window.location.origin + window.location.pathname);
+function hasAccessTo(_x) {
+  return _hasAccessTo.apply(this, arguments);
 }
 
-function login() {
-  // Allow the current app to make calls to the specified contract on the
-  // user's behalf.
-  // This works by creating a new access key for the user's account and storing
-  // the private key in localStorage.
-  window.walletConnection.requestSignIn(nearConfig.contractName);
-}
-
-function pay50() {
-  var account = window.walletConnection.account();
-  account.functionCall(nearConfig.contractName, 'getAccess', null, 0, 50);
-}
-
-function pay200() {
-  var account = window.walletConnection.account();
-  account.functionCall(nearConfig.contractName, 'getAccess', null, 0, 200);
-}
-},{"near-api-js":"../node_modules/near-api-js/lib/browser-index.js","./config":"config.js"}],"index.js":[function(require,module,exports) {
-"use strict";
-
-require("regenerator-runtime/runtime");
-
-var _utils = require("./utils");
-
-var _config = _interopRequireDefault(require("./config"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
-var _getConfig = (0, _config.default)("development" || 'development'),
-    networkId = _getConfig.networkId;
-
-document.querySelector('#sign-in-button').onclick = _utils.login;
-document.querySelector('#sign-out-button').onclick = _utils.logout;
-document.querySelector('#pay50').onclick = _utils.pay50;
-document.querySelector('#pay200').onclick = _utils.pay200; // Display the signed-out-flow container
-
-function signedOutFlow() {
-  document.querySelector('#signed-out-flow').style.display = 'block';
-} // Displaying the signed in flow container and fill in account-specific data
-
-
-function signedInFlow() {
-  return _signedInFlow.apply(this, arguments);
-}
-
-function _signedInFlow() {
-  _signedInFlow = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
-    return regeneratorRuntime.wrap(function _callee$(_context) {
-      while (1) {
-        switch (_context.prev = _context.next) {
-          case 0:
-            document.querySelector('#signed-in-flow').style.display = 'block';
-            document.querySelectorAll('[data-behavior=account-id]').forEach(function (el) {
-              el.innerText = window.accountId;
-            }); // Check if it payed or not
-
-            show_content();
-
-          case 3:
-          case "end":
-            return _context.stop();
-        }
-      }
-    }, _callee);
-  }));
-  return _signedInFlow.apply(this, arguments);
-}
-
-function show_content() {
-  return _show_content.apply(this, arguments);
-} // `nearInitPromise` gets called on page load
-
-
-function _show_content() {
-  _show_content = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
-    var payed;
+function _hasAccessTo() {
+  _hasAccessTo = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(influencer) {
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
             _context2.next = 2;
-            return contract.hasAccess();
+            return contract.hasAccessTo({
+              influencer: influencer
+            });
 
           case 2:
-            payed = _context2.sent;
-            if (payed == "YES") document.querySelector('#payed').style.display = 'block';else document.querySelector('#not-payed').style.display = 'block';
+            return _context2.abrupt("return", _context2.sent);
 
-          case 4:
+          case 3:
           case "end":
             return _context2.stop();
         }
       }
     }, _callee2);
   }));
-  return _show_content.apply(this, arguments);
+  return _hasAccessTo.apply(this, arguments);
 }
 
-window.nearInitPromise = (0, _utils.initContract)().then(function () {
-  if (window.walletConnection.isSignedIn()) signedInFlow();else signedOutFlow();
-}).catch(console.error);
-},{"regenerator-runtime/runtime":"../node_modules/regenerator-runtime/runtime.js","./utils":"utils.js","./config":"config.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+function subscribeTo(_x2, _x3) {
+  return _subscribeTo.apply(this, arguments);
+}
+
+function _subscribeTo() {
+  _subscribeTo = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(influencer, money_amount) {
+    var amount, account;
+    return regeneratorRuntime.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            // OPENS another webpage to pay
+            amount = _nearApiJs.utils.format.parseNearAmount(money_amount.toString());
+            account = window.walletConnection.account();
+            account.functionCall(nearConfig.contractName, 'subscribeTo', {
+              influencer: influencer
+            }, 0, amount);
+
+          case 3:
+          case "end":
+            return _context3.stop();
+        }
+      }
+    }, _callee3);
+  }));
+  return _subscribeTo.apply(this, arguments);
+}
+
+function getContentOf(_x4) {
+  return _getContentOf.apply(this, arguments);
+}
+
+function _getContentOf() {
+  _getContentOf = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4(influencer) {
+    return regeneratorRuntime.wrap(function _callee4$(_context4) {
+      while (1) {
+        switch (_context4.prev = _context4.next) {
+          case 0:
+            _context4.next = 2;
+            return contract.getContentOf({
+              influencer: influencer
+            });
+
+          case 2:
+            return _context4.abrupt("return", _context4.sent);
+
+          case 3:
+          case "end":
+            return _context4.stop();
+        }
+      }
+    }, _callee4);
+  }));
+  return _getContentOf.apply(this, arguments);
+}
+
+function addToMyContent(_x5) {
+  return _addToMyContent.apply(this, arguments);
+}
+
+function _addToMyContent() {
+  _addToMyContent = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee5(sialink) {
+    return regeneratorRuntime.wrap(function _callee5$(_context5) {
+      while (1) {
+        switch (_context5.prev = _context5.next) {
+          case 0:
+            _context5.next = 2;
+            return contract.addToMyContent({
+              sialink: sialink
+            });
+
+          case 2:
+            return _context5.abrupt("return", _context5.sent);
+
+          case 3:
+          case "end":
+            return _context5.stop();
+        }
+      }
+    }, _callee5);
+  }));
+  return _addToMyContent.apply(this, arguments);
+}
+
+function deleteFromMyContent(_x6) {
+  return _deleteFromMyContent.apply(this, arguments);
+} // PROFILE
+
+
+function _deleteFromMyContent() {
+  _deleteFromMyContent = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee6(sialink) {
+    return regeneratorRuntime.wrap(function _callee6$(_context6) {
+      while (1) {
+        switch (_context6.prev = _context6.next) {
+          case 0:
+            _context6.next = 2;
+            return contract.deleteFromMyContent({
+              sialink: sialink
+            });
+
+          case 2:
+            return _context6.abrupt("return", _context6.sent);
+
+          case 3:
+          case "end":
+            return _context6.stop();
+        }
+      }
+    }, _callee6);
+  }));
+  return _deleteFromMyContent.apply(this, arguments);
+}
+
+function updateMyProfile(_x7, _x8, _x9, _x10, _x11) {
+  return _updateMyProfile.apply(this, arguments);
+}
+
+function _updateMyProfile() {
+  _updateMyProfile = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee7(name, banner, avatar, description, price) {
+    return regeneratorRuntime.wrap(function _callee7$(_context7) {
+      while (1) {
+        switch (_context7.prev = _context7.next) {
+          case 0:
+            // Returns true if everything goes right
+            price = _nearApiJs.utils.format.parseNearAmount(price);
+            _context7.next = 3;
+            return contract.updateMyProfile({
+              name: name,
+              banner: banner,
+              avatar: avatar,
+              description: description,
+              price: price
+            });
+
+          case 3:
+            return _context7.abrupt("return", _context7.sent);
+
+          case 4:
+          case "end":
+            return _context7.stop();
+        }
+      }
+    }, _callee7);
+  }));
+  return _updateMyProfile.apply(this, arguments);
+}
+
+function getProfileOf(_x12) {
+  return _getProfileOf.apply(this, arguments);
+}
+
+function _getProfileOf() {
+  _getProfileOf = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee8(influencer) {
+    var profile;
+    return regeneratorRuntime.wrap(function _callee8$(_context8) {
+      while (1) {
+        switch (_context8.prev = _context8.next) {
+          case 0:
+            _context8.next = 2;
+            return contract.getProfileOf({
+              influencer: influencer
+            });
+
+          case 2:
+            profile = _context8.sent;
+
+            if (profile) {
+              _context8.next = 6;
+              break;
+            }
+
+            console.error("Profile does not exist");
+            return _context8.abrupt("return");
+
+          case 6:
+            profile.price = _nearApiJs.utils.format.formatNearAmount(profile.price).toString();
+            return _context8.abrupt("return", profile);
+
+          case 8:
+          case "end":
+            return _context8.stop();
+        }
+      }
+    }, _callee8);
+  }));
+  return _getProfileOf.apply(this, arguments);
+}
+
+function getMyInfluencers() {
+  return _getMyInfluencers.apply(this, arguments);
+} // SIA
+
+
+function _getMyInfluencers() {
+  _getMyInfluencers = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee9() {
+    return regeneratorRuntime.wrap(function _callee9$(_context9) {
+      while (1) {
+        switch (_context9.prev = _context9.next) {
+          case 0:
+            _context9.next = 2;
+            return contract.getMyInfluencers();
+
+          case 2:
+            return _context9.abrupt("return", _context9.sent);
+
+          case 3:
+          case "end":
+            return _context9.stop();
+        }
+      }
+    }, _callee9);
+  }));
+  return _getMyInfluencers.apply(this, arguments);
+}
+
+function generateUUID() {
+  var uuid = '';
+  var cs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+  for (var i = 0; i < 16; i++) {
+    uuid += cs.charAt(Math.floor(Math.random() * cs.length));
+  }
+
+  return uuid;
+}
+
+function upload_file_to_sia(_x13) {
+  return _upload_file_to_sia.apply(this, arguments);
+}
+
+function _upload_file_to_sia() {
+  _upload_file_to_sia = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee10(file) {
+    var uuid, formData, response;
+    return regeneratorRuntime.wrap(function _callee10$(_context10) {
+      while (1) {
+        switch (_context10.prev = _context10.next) {
+          case 0:
+            uuid = generateUUID();
+            formData = new FormData();
+            formData.append("file", file);
+            _context10.next = 5;
+            return fetch('https://siasky.net/skynet/skyfile/' + uuid, {
+              method: "POST",
+              body: formData
+            }).then(function (response) {
+              return response.json();
+            }).then(function (success) {
+              return success.skylink;
+            }).catch(function (error) {
+              console.log(error);
+            });
+
+          case 5:
+            response = _context10.sent;
+            return _context10.abrupt("return", response);
+
+          case 7:
+          case "end":
+            return _context10.stop();
+        }
+      }
+    }, _callee10);
+  }));
+  return _upload_file_to_sia.apply(this, arguments);
+}
+},{"near-api-js":"../node_modules/near-api-js/lib/browser-index.js","./config":"config.js"}],"index.js":[function(require,module,exports) {
+"use strict";
+
+require("regenerator-runtime/runtime");
+
+var _blockchain = require("./blockchain");
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+window.login = _blockchain.login;
+window.logout = _blockchain.logout; // Harcoded influencer for now
+
+var spinner = '<i class="fas fa-sync fa-spin"></i>';
+var $influencerGrid, $contentGrid, $searchGrid;
+var avatarPlaceholder, bannerPlaceholder;
+$(document).ready(function () {
+  // ------------------------------------------------------
+  // ADD CONTENT EVENTS
+  // ------------------------------------------------------
+  $("#upload-content-input").change(function () {
+    uploadFilePreview(this, function (preview) {
+      $('#upload-content-preview').attr('src', preview);
+      $('#upload-content-preview').show();
+      $('.btn-upload').hide();
+    });
+  });
+  avatarPlaceholder = $('#influencer-avatar').attr('src');
+  bannerPlaceholder = $('#influencer-banner').attr('src');
+  $("#add-content-btn").click( /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+    var contentFile, link, caption;
+    return regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            contentFile = $("#upload-content-input").prop('files');
+
+            if (!(contentFile && contentFile[0])) {
+              _context.next = 12;
+              break;
+            }
+
+            $("#add-content-btn").html('Uploading... ' + spinner);
+            _context.next = 5;
+            return (0, _blockchain.upload_file_to_sia)(contentFile[0]);
+
+          case 5:
+            link = _context.sent;
+            caption = $("#content-title-input").val();
+            _context.next = 9;
+            return (0, _blockchain.addToMyContent)('https://siasky.net/' + link, caption);
+
+          case 9:
+            // show new content on profile
+            $("#add-content-modal").modal('hide');
+            $("#add-content-btn").html('Add content');
+            showProfile(); // var img = $('#upload-content-preview').attr('src');
+            // should upload to sia
+            // serverAddContent(img,$("#content-title-input").val());
+            // show new content on profile
+            // showProfile()
+
+          case 12:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee);
+  })));
+  $("#add-content-modal").on("show.bs.modal", function () {
+    $('#upload-content-preview').hide();
+    $("#upload-content-input").val('');
+    $('.btn-upload').show();
+  }); // ------------------------------------------------------
+  // EDIT PROFILE EVENTS
+  // ------------------------------------------------------
+
+  $("#upload-banner-input").change(function () {
+    uploadFilePreview(this, function (preview) {
+      $('#edit-banner-img').attr('src', preview);
+    });
+  });
+  $("#upload-avatar-input").change(function () {
+    uploadFilePreview(this, function (preview) {
+      $('#edit-avatar-img').attr('src', preview);
+    });
+  });
+  $("#edit-profile-modal").on("show.bs.modal", /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
+    var influencerProfile;
+    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            _context2.next = 2;
+            return (0, _blockchain.getProfileOf)(accountId);
+
+          case 2:
+            influencerProfile = _context2.sent;
+
+            if (!influencerProfile) {
+              influencerProfile = {
+                name: "",
+                profile: "",
+                price: 30,
+                avatar: avatarPlaceholder,
+                banner: bannerPlaceholder
+              };
+            }
+
+            $("#influencer-name-input").val(influencerProfile.name);
+            $("#influencer-profile-input").val(influencerProfile.profile);
+            $("#influencer-price-input").val(influencerProfile.price);
+            $("#edit-avatar-img").attr('src', influencerProfile.avatar);
+            $("#edit-banner-img").attr('src', influencerProfile.banner);
+
+          case 9:
+          case "end":
+            return _context2.stop();
+        }
+      }
+    }, _callee2);
+  })));
+  $("#edit-profile-save").click(function () {
+    var name = $("#influencer-name-input").val();
+    var description = $("#influencer-profile-input").val();
+    var price = $("#influencer-price-input").val();
+    var avatarFiles = $("#upload-avatar-input").prop('files');
+    var bannerFiles = $("#upload-banner-input").prop('files');
+
+    if ($('#become-influencer-btn').is(":visible")) {
+      $("#become-influencer-btn").hide();
+      $(".influencer-btn").show();
+    }
+
+    if (avatarFiles && avatarFiles[0] && bannerFiles && bannerFiles[0]) {
+      var uploads = [(0, _blockchain.upload_file_to_sia)(avatarFiles[0]), (0, _blockchain.upload_file_to_sia)(bannerFiles[0])];
+      $("#edit-profile-save").html('Saving... ' + spinner);
+      Promise.all(uploads).then( /*#__PURE__*/function () {
+        var _ref3 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(links) {
+          return regeneratorRuntime.wrap(function _callee3$(_context3) {
+            while (1) {
+              switch (_context3.prev = _context3.next) {
+                case 0:
+                  _context3.next = 2;
+                  return (0, _blockchain.updateMyProfile)(name, 'https://siasky.net/' + links[1], 'https://siasky.net/' + links[0], description, price);
+
+                case 2:
+                  _context3.next = 4;
+                  return (0, _blockchain.getProfileOf)(accountId);
+
+                case 4:
+                  accountProfile = _context3.sent;
+                  $("#edit-profile-modal").modal('hide');
+                  $("#edit-profile-save").html("Save changes");
+                  showProfile();
+
+                case 8:
+                case "end":
+                  return _context3.stop();
+              }
+            }
+          }, _callee3);
+        }));
+
+        return function (_x) {
+          return _ref3.apply(this, arguments);
+        };
+      }());
+    } else {
+      console.log("no avatar or banner"); // error no avatar or banner
+    }
+  }); // ------------------------------------------------------
+  // INIT SIDEBAR 
+  // ------------------------------------------------------
+
+  $("#sidebar").mCustomScrollbar({
+    theme: "minimal"
+  });
+  $('#dismiss, .overlay, .nav-btn').on('click', function () {
+    $('#sidebar').removeClass('active');
+    $('.overlay').removeClass('active');
+  });
+  $('#sidebarCollapse').on('click', function () {
+    $('#sidebar').addClass('active');
+    $('.overlay').addClass('active');
+    $('.collapse.in').toggleClass('in');
+    $('a[aria-expanded=true]').attr('aria-expanded', 'false');
+  }); // ------------------------------------------------------
+  // INIT GRIDS 
+  // ------------------------------------------------------
+
+  $influencerGrid = initiateGrid('.featured-influencers');
+  $contentGrid = initiateGrid('.content-gallery');
+  $searchGrid = initiateGrid('.search-gallery'); // ------------------------------------------------------
+  // INIT LIGHTBOX GALLERY 
+  // ------------------------------------------------------
+
+  $(document).on('click', '[data-toggle="lightbox"]', function (event) {
+    event.preventDefault();
+    $(this).ekkoLightbox({
+      onContentLoaded: function onContentLoaded() {
+        var container = $('.ekko-lightbox-container');
+        var image = container.find('img');
+        var windowHeight = $(window).height();
+
+        if (image.height() + 200 > windowHeight) {
+          image.css('height', windowHeight - 150);
+          var dialog = container.parents('.modal-dialog');
+          var padding = parseInt(dialog.find('.modal-body').css('padding'));
+          dialog.css('max-width', image.width() + padding * 2 + 2);
+        }
+      }
+    });
+  });
+  window.nearInitPromise = (0, _blockchain.initNEAR)().then(function (connected) {
+    if (connected) loginFlow();else logoutFlow();
+  });
+}); // ------------------------------------------------------
+// USER LOGGED IN
+// ------------------------------------------------------
+
+function loginFlow() {
+  return _loginFlow.apply(this, arguments);
+}
+
+function _loginFlow() {
+  _loginFlow = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee9() {
+    return regeneratorRuntime.wrap(function _callee9$(_context9) {
+      while (1) {
+        switch (_context9.prev = _context9.next) {
+          case 0:
+            $("#logged-out").hide();
+            $("#logged-in").show();
+            $(".logged-user-name").html(accountId);
+            _context9.next = 5;
+            return (0, _blockchain.getProfileOf)(accountId);
+
+          case 5:
+            window.accountProfile = _context9.sent;
+
+            if (accountProfile) {
+              // is influencer, main page is profile
+              showProfile();
+              $("#become-influencer-btn").hide();
+              $(".influencer-btn").show();
+            } else {
+              // is not influencer, show subscription content
+              $("#become-influencer-btn").show();
+              $(".influencer-btn").hide();
+              showSubscriptionContent();
+            }
+
+          case 7:
+          case "end":
+            return _context9.stop();
+        }
+      }
+    }, _callee9);
+  }));
+  return _loginFlow.apply(this, arguments);
+}
+
+function logoutFlow() {
+  $("#logged-in").hide();
+  $("#logged-out").show();
+} // ------------------------------------------------------
+// GRID MANAGEMENT
+// ------------------------------------------------------
+
+
+function initiateGrid(gridClass) {
+  var $grid = $(gridClass).masonry({
+    temSelector: '.grid-item',
+    columnWidth: '.grid-sizer',
+    percentPosition: true
+  }); // Initate imagesLoaded
+
+  $grid.imagesLoaded().progress(function () {
+    $influencerGrid.masonry('layout');
+  });
+  return $grid;
+} // ------------------------------------------------------
+// FILE MANAGEMENT
+// ------------------------------------------------------
+
+
+function uploadFilePreview(uploader, callback) {
+  // upload file in frontend and show preview
+  if (uploader.files && uploader.files[0]) {
+    var reader = new FileReader();
+
+    reader.onload = function (e) {
+      callback(e.target.result);
+    };
+
+    reader.readAsDataURL(uploader.files[0]); // convert to base64 string
+  }
+} // ------------------------------------------------------
+// FIND INFLUENCERS
+// ------------------------------------------------------
+
+
+window.searchInfluencers = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
+  var name, influencerProfile;
+  return regeneratorRuntime.wrap(function _callee4$(_context4) {
+    while (1) {
+      switch (_context4.prev = _context4.next) {
+        case 0:
+          name = $('#influencerSearch').val();
+          $('#searching-influencer').html('Searching influencer... ' + spinner);
+          $('#searching-influencer').show();
+          _context4.next = 5;
+          return (0, _blockchain.getProfileOf)(name);
+
+        case 5:
+          influencerProfile = _context4.sent;
+
+          if (influencerProfile) {
+            $('#searching-influencer').hide();
+            showProfile(name, influencerProfile);
+          } else {
+            // couldn't find it 
+            $('#searching-influencer').html("No influencer with that name was found.");
+          } // setInfluencersList(influencers,'found-influencer',$searchGrid);
+          // $("#search-results").show();
+          // $("#featured-influencers").hide();
+
+
+        case 7:
+        case "end":
+          return _context4.stop();
+      }
+    }
+  }, _callee4);
+}));
+
+window.seeFeaturedInfluencers = function () {
+  $("#search-results").hide();
+  $("#featured-influencers").show();
+};
+
+window.subscribeToInfluencer = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee5() {
+  var target, price, influencerProfile;
+  return regeneratorRuntime.wrap(function _callee5$(_context5) {
+    while (1) {
+      switch (_context5.prev = _context5.next) {
+        case 0:
+          target = $(".subscribe-btn").attr('target');
+          price = $(".subscribe-btn").attr('price');
+          _context5.next = 4;
+          return (0, _blockchain.subscribeTo)(target, price);
+
+        case 4:
+          _context5.next = 6;
+          return (0, _blockchain.getProfileOf)(target);
+
+        case 6:
+          influencerProfile = _context5.sent;
+          showProfile(target, influencerProfile);
+
+        case 8:
+        case "end":
+          return _context5.stop();
+      }
+    }
+  }, _callee5);
+})); // ------------------------------------------------------
+// PAGE NAVIGATION
+// ------------------------------------------------------
+
+window.showSubscriptionContent = function showSubscriptionContent() {
+  var subs = (0, _blockchain.getMyInfluencers)();
+
+  if (!subs.length) {
+    return showFindInfluencers();
+  }
+
+  $("#find-influencers").hide();
+  $("#influencer-profile").hide();
+  $("#my-subs-banner").show();
+  var content = [];
+  subs.forEach(function (influencer) {
+    var influencerContent = (0, _blockchain.getContentOf)(influencer);
+    content.push(influencerContent.map(function (post) {
+      return _objectSpread({
+        owner: influencer
+      }, post);
+    }));
+  });
+  content.sort(function (c1, c2) {
+    return c1.creationDate > c2.creationDate;
+  });
+  showContentInGrid(content, false);
+};
+
+window.showFindInfluencers = function showFindInfluencers() {
+  $("#influencer-profile").hide();
+  $("#influencer-content").hide();
+  $("#search-results").hide();
+  $("#my-subs-banner").hide();
+  $("#find-influencers").show(); // TODO: show featured influencers
+  // var featured = serverGetFeatured();
+  // $("#featured-influencers").show();
+  // setInfluencersList(featured,'featured-influencer',$influencerGrid)
+
+  $("#featured-influencers").hide();
+  $("#discover-btn").hide();
+};
+
+function setInfluencersList(influencers, section, $grid) {
+  $(".".concat(section)).remove();
+  influencers.forEach(function (f) {
+    var inf = $('.influencer-list-template').clone();
+    inf.find('img').attr('src', f.avatar);
+    inf.find('.influencer-link').attr('target', f.id);
+    inf.find('.influencer-name').html(f.name);
+    inf.removeClass('influencer-list-template');
+    inf.addClass(section);
+    $grid.append(inf).masonry('appended', inf).masonry();
+  });
+  $(".influencer-link").click( /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee6() {
+    var influencer, influencerProfile;
+    return regeneratorRuntime.wrap(function _callee6$(_context6) {
+      while (1) {
+        switch (_context6.prev = _context6.next) {
+          case 0:
+            influencer = $(this).attr('target');
+            _context6.next = 3;
+            return (0, _blockchain.getProfileOf)(influencer);
+
+          case 3:
+            influencerProfile = _context6.sent;
+            showProfile(influencer, influencerProfile);
+
+          case 5:
+          case "end":
+            return _context6.stop();
+        }
+      }
+    }, _callee6, this);
+  })));
+}
+
+window.showProfile = /*#__PURE__*/function () {
+  var _showProfile = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee7(influencerId, influencerProfile) {
+    var hasAcces, content;
+    return regeneratorRuntime.wrap(function _callee7$(_context7) {
+      while (1) {
+        switch (_context7.prev = _context7.next) {
+          case 0:
+            if (!influencerId) {
+              influencerId = accountId;
+              influencerProfile = accountProfile;
+            }
+
+            $("#find-influencers").hide();
+            $("#my-subs-banner").hide();
+            $(".influencer-name").html(influencerProfile.name);
+            $(".influencer-description").html(influencerProfile.description);
+            $("#influencer-followers").html(influencerProfile.fans);
+            $("#influencer-avatar").attr('src', influencerProfile.avatar);
+            $("#influencer-banner").attr('src', influencerProfile.banner);
+            $(".subscribe-btn").attr('target', influencerProfile.id);
+            $(".subscribe-btn").attr('price', influencerProfile.price);
+            $(".subscribe-btn").html("Subscribe for ".concat(influencerProfile.price, "(N) per month to see all the content!"));
+            $(".subscribe-btn").hide();
+            $(".single-content").remove();
+            $("#influencer-content").show();
+            $('#loading-influencer-content').show();
+            $('#loading-influencer-content').html("Loading content... " + spinner);
+            $("#influencer-profile").show();
+            _context7.next = 19;
+            return (0, _blockchain.hasAccessTo)(influencerId);
+
+          case 19:
+            hasAcces = _context7.sent;
+
+            if (hasAcces) {
+              _context7.next = 25;
+              break;
+            }
+
+            $(".subscribe-btn").show();
+            $("#influencer-content").hide();
+            _context7.next = 29;
+            break;
+
+          case 25:
+            _context7.next = 27;
+            return (0, _blockchain.getContentOf)(influencerId);
+
+          case 27:
+            content = _context7.sent;
+
+            if (!content.length) {
+              $("#influencer-content").hide();
+              $('#loading-influencer-content').html("".concat(influencerProfile.name, " doesn't have any content yet!"));
+            } else {
+              $('#loading-influencer-content').hide();
+              showContentInGrid(addOwner(content, influencerId, influencerProfile.name), true);
+            }
+
+          case 29:
+          case "end":
+            return _context7.stop();
+        }
+      }
+    }, _callee7);
+  }));
+
+  function showProfile(_x2, _x3) {
+    return _showProfile.apply(this, arguments);
+  }
+
+  return showProfile;
+}();
+
+function addOwner(content, id, name) {
+  return content.map(function (c) {
+    return _objectSpread({
+      owner: {
+        id: id,
+        name: name
+      }
+    }, c);
+  });
+}
+
+function showContentInGrid(content, inProfile) {
+  $(".single-content").remove();
+  $("#influencer-content").show();
+  content.forEach(function (c) {
+    return showSingleContent(c, inProfile);
+  });
+}
+
+function showSingleContent(content, inProfile) {
+  var newContent = $(".content-template").clone();
+  newContent.find('.main-content').attr('href', content.sialink);
+  newContent.find('img').attr('src', content.sialink);
+  newContent.find('h2').html(content.description);
+  var date = new Date(content.creationDate / 1000000);
+  newContent.find('.small').html("Uploaded on " + date.toDateString());
+
+  if (!inProfile) {
+    newContent.find('.visit-influencer-btn').attr('target', content.owner.id);
+    newContent.find('.visit-influencer-btn').html("Visit " + content.owner.name);
+    newContent.find('.remove-content-btn').remove();
+    newContent.find('.visit-influencer-btn').click( /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee8() {
+      var target, influencerProfile;
+      return regeneratorRuntime.wrap(function _callee8$(_context8) {
+        while (1) {
+          switch (_context8.prev = _context8.next) {
+            case 0:
+              target = $(this).attr('target');
+              _context8.next = 3;
+              return (0, _blockchain.getProfileOf)(target);
+
+            case 3:
+              influencerProfile = _context8.sent;
+              showProfile(target, influencerProfile);
+
+            case 5:
+            case "end":
+              return _context8.stop();
+          }
+        }
+      }, _callee8, this);
+    })));
+  } else {
+    newContent.find('.visit-influencer-btn').remove();
+
+    if (content.owner.id != accountId) {
+      newContent.find('.remove-content-btn').remove();
+    } else {
+      newContent.find('.remove-content-btn').attr('target', content.sialink);
+      newContent.find('.remove-content-btn').click(function () {
+        var target = $(this).attr('target');
+        (0, _blockchain.deleteFromMyContent)(target).then(function () {
+          showProfile();
+        });
+      });
+    }
+  }
+
+  newContent.addClass("single-content");
+  newContent.removeClass("content-template");
+  newContent.removeClass("d-none");
+  $contentGrid.append(newContent).masonry('appended', newContent).masonry();
+}
+},{"regenerator-runtime/runtime":"../node_modules/regenerator-runtime/runtime.js","./blockchain":"blockchain.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -22769,7 +23522,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "33425" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "35255" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
