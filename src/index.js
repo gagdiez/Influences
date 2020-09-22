@@ -1,15 +1,15 @@
 import 'regenerator-runtime/runtime'
 
-import { initContract, login, logout, pay50, pay200, influencer_name } from './utils'
+import { initNEAR, login, logout, hasAccessTo, getContentOf, getProfileOf,
+         subscribeTo } from './blockchain'
 
-import getConfig from './config'
-const { networkId } = getConfig(process.env.NODE_ENV || 'development')
 
+export const influencer_name = 'influencer.testnet'
 
 document.querySelector('#sign-in-button').onclick = login
 document.querySelector('#sign-out-button').onclick = logout
-document.querySelector('#pay50').onclick = pay50
-document.querySelector('#pay200').onclick = pay200
+document.querySelector('#pay1').onclick = pay1
+document.querySelector('#pay5').onclick = pay5
 
 // Display the signed-out-flow container
 function signedOutFlow() {
@@ -24,16 +24,26 @@ async function signedInFlow() {
     el.innerText = window.accountId
   })
 
+  document.querySelectorAll('[data-behavior=influencer-id]').forEach(el => {
+    el.innerText = influencer_name
+  })
+  
+  let profile = await getProfileOf(influencer_name)
+  
+  document.querySelectorAll('[data-behavior=influencer-cost]').forEach(el => {
+    el.innerText = profile.price
+  })
+
   // Check if it payed or not
   show_content()
 }
 
 async function show_content(){
-  let subcribed = await contract.hasAccess({influencer:influencer_name})
+  let subcribed = await hasAccessTo(influencer_name)
   
   if (subcribed){
   	document.querySelector('#payed').style.display = 'block'
-  	let content = await contract.getContent({influencer:'influencer.testnet'})
+  	let content = await getContentOf(influencer_name)
   	
   	document.querySelectorAll('[data-behavior=influencer-content]').forEach(el => {
       el.innerText = content
@@ -43,10 +53,15 @@ async function show_content(){
   }
 }
 
-// `nearInitPromise` gets called on page load
-window.nearInitPromise = initContract()
-  .then(() => {
-    if (window.walletConnection.isSignedIn()) signedInFlow()
-    else signedOutFlow()
-  })
-  .catch(console.error)
+
+export function pay1(){
+    subscribeTo(influencer_name, 1)
+}
+
+export function pay5(){
+    subscribeTo(influencer_name, 5)
+}
+
+window.nearInitPromise = initNEAR()
+    .then(connected => { if (connected) signedInFlow()
+                         else signedOutFlow() })

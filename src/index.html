@@ -14,11 +14,13 @@
     <button id="sign-out-button"> Sign out </button>
     <main>
       <h1> Hi <span data-behavior="account-id"></span>! </h1>
+      <h4> I am <span data-behavior="influencer-id"></span>,
+           and I cost <span data-behavior="influencer-cost"></span> NEAR</h4>
 
       <div id="not-payed" style="display: none">
-          You have not payed, click here to pay 1 NEAR:
-          <button id="pay50">PAY NOT ENOUGH</button>
-          <button id="pay200">PAY ENOUGH</button>
+          You have not payed, click here to pay:
+          <button id="pay1">PAY 1</button>
+          <button id="pay5">PAY 5</button>
       </div>
       <div id="payed" style="display: none">
           You have payed, loading the content... 
