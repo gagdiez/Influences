@@ -29,52 +29,57 @@ export async function initNEAR() {
   window.accountId = window.walletConnection.getAccountId()
 
   // Initializing contract APIs
-  window.contract = await new Contract(
+  window.contract = new Contract(
     window.walletConnection.account(),
     nearConfig.contractName,
     {viewMethods: ['getProfileOf'],
-     changeMethods: ['hasAccessTo', 'getContentOf', 'goSubscribeTo',
-                     'addToMyContent', 'deleteFromMyContent', 'setMyProfile']}
+     changeMethods: ['hasAccessTo', 'getContentOf', 'subscribeTo', 'getMyInfluencers',
+                     'addToMyContent', 'deleteFromMyContent', 'updateMyProfile']}
   )
   return walletConnection.isSignedIn()
 }
 
 // CONTENT
 export async function hasAccessTo(influencer){
-  return await contract.hasAccessTo({influencer:influencer})
+  return await contract.hasAccessTo({influencer})
 }
 
 export async function subscribeTo(influencer, money_amount){
   let amount = utils.format.parseNearAmount(money_amount.toString())
   let account = window.walletConnection.account()
   account.functionCall(nearConfig.contractName, 'subscribeTo',
-  					   {influencer:influencer}, 0, amount)
+  					   {influencer}, 0, amount)
 }
 
 export async function getContentOf(influencer){
-  return await contract.getContentOf({influencer:influencer})
+  return await contract.getContentOf({influencer})
 }
 
 export async function addToMyContent(sialink){
-  return await contract.addToMyContent({sialink:sialink})
+  return await contract.addToMyContent({sialink})
 }
 
 export async function deleteFromMyContent(sialink){
-  return await contract.deleteFromMyContent({sialink:sialink})
+  return await contract.deleteFromMyContent({sialink})
 }
 
-// PROFILE
-export async function setMyProfile(header, profile_pic, price){
+// PROFILE name:string, public banner:string, public avatar: string,
+export async function updateMyProfile(name, banner, avatar, description, price){
   price = utils.format.parseNearAmount(price)
-  return await contract.setMyProfile({header:header, picture:profile_pic,
-                                      price:price})
+  return await contract.updateMyProfile({name, banner, avatar,
+                                         description, price})
 }
 
 export async function getProfileOf(influencer){
-  let profile = await contract.getProfileOf({influencer:influencer})
-  if(!profile){return}
-  profile.price = utils.format.formatNearAmount(profile.price)
+  let profile = await contract.getProfileOf({influencer})
+  if(!profile){console.error("Profile does not exist"); return;}
+  profile.price = utils.format.formatNearAmount(profile.price).toString()
+
   return profile
+}
+
+export async function getMyInfluencers(){
+  return await contract.getMyInfluencers()
 }
 
 // SIA

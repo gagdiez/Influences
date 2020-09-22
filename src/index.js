@@ -4,7 +4,7 @@ import { initNEAR, login, logout, hasAccessTo, getContentOf, getProfileOf,
          subscribeTo, upload_file_to_sia } from './blockchain'
 
 // Harcoded influencer for now
-export const influencer_name = 'influencer.testnet'
+export const influencer_name = 'fan.testnet'
 
 // Add events to each button on screen
 document.querySelector('#sign-in-button').onclick = login
@@ -33,9 +33,23 @@ async function signedInFlow() {
   let profile = await getProfileOf(influencer_name)
   
   if(profile){
-    document.querySelectorAll('[data-behavior=influencer-cost]').forEach(el => {
+
+    document.querySelectorAll('[data-behavior=influencer-id]').forEach(el => {
+      el.innerText = influencer_name
+    })
+
+    document.querySelectorAll('[data-behavior=influencer-name]').forEach(el => {
+        el.innerText = profile.name
+    })
+
+    document.querySelectorAll('[data-behavior=influencer-fans]').forEach(el => {
+        el.innerText = profile.fans
+    })
+
+    document.querySelectorAll('[data-behavior=influencer-price]').forEach(el => {
         el.innerText = profile.price
     })
+
   }
 
   // Check if it payed or not
