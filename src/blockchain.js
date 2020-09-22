@@ -72,6 +72,31 @@ export async function setMyProfile(header, profile_pic, price){
 
 export async function getProfileOf(influencer){
   let profile = await contract.getProfileOf({influencer:influencer})
+  if(!profile){return}
   profile.price = utils.format.formatNearAmount(profile.price)
   return profile
+}
+
+// SIA
+function generateUUID() {
+  let uuid = ''
+  const cs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  for (let i = 0; i < 16; i++) {
+    uuid += cs.charAt(Math.floor(Math.random() * cs.length))
+  }
+  return uuid;
+}
+
+export async function upload_file_to_sia(file){
+  const uuid = generateUUID()
+
+  var formData = new FormData()
+  formData.append("file", file)
+
+  let response = await fetch('https://siasky.net/skynet/skyfile/'+uuid,
+                             {method:"POST", body:formData})
+                .then(response => response.json())
+                .then(success => {return success.skylink})
+                .catch(error => {console.log(error)})
+  return response
 }

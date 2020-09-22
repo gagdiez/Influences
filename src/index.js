@@ -1,15 +1,17 @@
 import 'regenerator-runtime/runtime'
 
 import { initNEAR, login, logout, hasAccessTo, getContentOf, getProfileOf,
-         subscribeTo } from './blockchain'
+         subscribeTo, upload_file_to_sia } from './blockchain'
 
-
+// Harcoded influencer for now
 export const influencer_name = 'influencer.testnet'
 
+// Add events to each button on screen
 document.querySelector('#sign-in-button').onclick = login
 document.querySelector('#sign-out-button').onclick = logout
 document.querySelector('#pay1').onclick = pay1
 document.querySelector('#pay5').onclick = pay5
+document.getElementById("fname").addEventListener('change', fselected, false)
 
 // Display the signed-out-flow container
 function signedOutFlow() {
@@ -30,9 +32,11 @@ async function signedInFlow() {
   
   let profile = await getProfileOf(influencer_name)
   
-  document.querySelectorAll('[data-behavior=influencer-cost]').forEach(el => {
-    el.innerText = profile.price
-  })
+  if(profile){
+    document.querySelectorAll('[data-behavior=influencer-cost]').forEach(el => {
+        el.innerText = profile.price
+    })
+  }
 
   // Check if it payed or not
   show_content()
@@ -53,13 +57,20 @@ async function show_content(){
   }
 }
 
+// Functions for interaction
 
-export function pay1(){
+function pay1(){
     subscribeTo(influencer_name, 1)
 }
 
-export function pay5(){
+function pay5(){
     subscribeTo(influencer_name, 5)
+}
+
+async function fselected(){
+    let file = document.getElementById("fname").files[0]
+    let skylink = await upload_file_to_sia(file)
+    console.log("Done, uploaded to:" + skylink)
 }
 
 window.nearInitPromise = initNEAR()
