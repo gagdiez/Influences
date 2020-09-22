@@ -23,9 +23,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css">
 
 	<script src="/style3.20678cbc.js"></script></head>
-	<body style="background-image: url('/background.73f2e897.jpg');">
-
-		<div class="overlay"></div>
+	<!-- <body style="background-image: url('assets/background.jpg');"> -->
+	<body>
 
 		<div id="logged-out">
 			<section class="pt-0 pb-5 header text-center">
@@ -40,87 +39,44 @@
 		<div id="logged-in" style="display: none;">
 			
 					<!-- Sidebar  -->
-	        <nav id="sidebar">
-	            <div id="dismiss">
-	                <i class="fas fa-arrow-left"></i>
-	            </div>
 
-	            <div class="sidebar-header">
-	                <h3>NearFans</h3>
-	            </div>
+			<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+			  <a class="navbar-brand" href="#">NearFans</a>
 
-	            <ul class="list-unstyled components">
-	            	<li><a type="button" id="find-influencers-btn" class="nav-btn" href="#" onclick="showFindInfluencers()">Find influencers</a></li>
-	            	<li><a type="button" id="my-subs-btn" class="nav-btn" href="#" onclick="showSubscriptionContent()">My subscriptions</a></li>
-	            </ul>
-
-	            <ul class="list-unstyled components">
-	                <li><a type="button" data-toggle="modal" data-target="#edit-profile-modal" class="nav-btn" href="#" id="become-influencer-btn">Become an influencer</a></li>
-	                <li><a type="button" id="my-profile-btn" class="nav-btn influencer-btn" onclick="showProfile()" href="#">My profile</a></li>
-	                <li><a type="button" data-toggle="modal" data-target="#edit-profile-modal" class="nav-btn influencer-btn" href="#">Edit profile</a></li>
-	                <li><a type="button" data-toggle="modal" data-target="#add-content-modal" class="nav-btn influencer-btn" href="#">Add post</a></li>
-	            </ul>
-
-	            <ul class="list-unstyled components">
-	                <li><a type="button" id="logout-btn" class="nav-btn" href="#" onclick="logout()">Logout</a></li>
-	            </ul>
-
-	        </nav>
-
-	        <button type="button" id="sidebarCollapse" class="btn btn-dark" style="position: absolute; margin: 10px">
-                <i class="fas fa-bars"></i>
-            </button>
-
+			  <div class="collapse navbar-collapse">
+			    <ul class="navbar-nav mr-auto">
+			    	
+			    </ul>
+			    <ul class="navbar-nav">
+			    	<li class="nav-item mr-sm-2"><a type="button" data-toggle="modal" data-target="#edit-profile-modal" href="#" id="become-influencer-btn" style="display: none" class="btn btn-outline-light">Become an influencer</a></li>
+	                <li class="nav-item mr-sm-2"><a type="button" id="my-profile-btn" class="btn btn-outline-light influencer-btn" onclick="showProfile()" style="display: none" href="#">My profile</a></li>
+	                <li class="nav-item mr-sm-2"><a type="button" data-toggle="modal" data-target="#edit-profile-modal" class="btn btn-outline-light influencer-btn" style="display: none" href="#">Edit profile</a></li>
+	                <li class="nav-item mr-sm-2"><a type="button" data-toggle="modal" data-target="#add-content-modal" class="btn btn-outline-light influencer-btn" style="display: none" href="#">Add post</a></li>
+	                <li class="nav-item mr-sm-2">
+	                	<div class="text-white btn btn-outline-dark"><i class="fas fa-ellipsis-v"></i></div></li>
+			    </ul>
+			    <form class="form-inline my-2 my-lg-0">
+			      <input class="form-control mr-sm-2" type="text" placeholder="Find influencer" id="influencerSearch" aria-label="Search">
+			      <button class="btn btn-outline-light mr-sm-2" id="search-btn" type="button" onclick="searchInfluencers()">Search</button>
+			    </form>
+			    <ul class="navbar-nav">
+			    	<li class="nav-item mr-sm-2">
+	                	<div class="text-white btn btn-outline-dark"><i class="fas fa-ellipsis-v"></i></div></li>
+			    	<li class="nav-item"><a type="button" id="logout-btn" class="btn btn-outline-lightbtn btn-outline-light" href="#" onclick="logout()">Logout</a></li>
+			    </ul>
+			  </div>
+			</nav>
+	        
             <section class="container" id="my-subs-banner">
 		        <div class="jumbotron bg-dark">
 				  <h1 class="display-4 text-white">Welcome <span class="logged-user-name"></span>!</h1>
-				  <p class="lead">This is what your favourite influencers have been up to.</p>
+				  <p class="lead loading-subs">Finding your subscription content... <i class="fas fa-sync fa-spin"></i></p>
+				  <p class="lead has-subs">This is what your favourite influencers have been up to.</p>
+				  <p class="lead has-no-subs">You're not following anyone yet. Find some influencers and become a fan!</p>
 				</div>
-			</section>
-
-            <section class="container" id="find-influencers">
-		        <div class="jumbotron bg-dark">
-				  <h1 class="display-4 text-white">Welcome <span class="logged-user-name"></span>!</h1>
-				  <p class="lead">Find influencers and become a fan.</p>
-				  <div class="form-group text-center mb-3">
-				  	<button class="btn btn-secondary btn-lg" type="button" onclick="seeFeaturedInfluencers()" id="discover-btn">Discover!</button>
-				  </div>
-				  <hr class="my-4">
-				  <p>Do you know exactly who you want? Find them and show them your support.</p>
-				  <div class="input-group">
-
-	   				<input type="text" class="form-control" id="influencerSearch" placeholder="find an influencer">
-				    <div class="input-group-append">
-				       <button class="btn btn-secondary" type="button" onclick="searchInfluencers()">Search!</button>
-				    </div>
-				  </div>
-				  <div class="alert alert-dark mt-3" role="alert" style="display: none" id="searching-influencer"></div>
-				</div>
-				<div id="search-results" style="display: none">
-					<h1>Search results</h1>
-					<div class="container text-center">
-				        <div class="gallery-wrapper search-gallery">
-				            <div class="grid-sizer col-lg-4 col-md-6"></div>
-				            
-				        </div>
-				    </div>
-				</div>
-				<div id="featured-influencers">
-					<h1>Featured Influencers</h1>
-					<div class="container text-center">
-				        <!-- Masonry grid -->
-				        <div class="gallery-wrapper featured-influencers">
-				            <!-- Grid sizer -->
-				            <div class="grid-sizer col-lg-4 col-md-6"></div>
-				            
-				        </div>
-				    </div>
-				</div>
-				
 			</section>
 
 			<section class="pt-0 pb-5 header text-center" id="influencer-profile" style="display: none">
-				
 	        	<img src="/bannerplaceholder.2bab7ac2.png" id="influencer-banner" class="img-fluid">
 	        	<div class="avatar">
                     <img alt="" id="influencer-avatar" src="/avatarplaceholder.c6e080c5.png">
@@ -130,14 +86,13 @@
 	            <p class="font-italic text-muted mb-1 influencer-description">Dame toda la guita, papi.</p>
 	            
 	            <button type="button" class="btn btn-secondary btn-lg subscribe-btn mt-3" onclick="subscribeToInfluencer()" target="influencerId">Subscribe!</button>
-				            
 			</section>
 
 			<div id="templates" class="d-none">
 
 				<div class="col-lg-4 col-md-6 grid-item mb-4 grid-content content-template">
-	            	<a href="/pic-1.422c45f2.jpg" class="main-content" data-toggle="lightbox">
-		                <img src="/pic-1.422c45f2.jpg" class="img-fluid w-100 mb-3 img-thumbnail shadow-sm rounded-0">
+	            	<a href="#" class="main-content" data-toggle="lightbox" data-type="image">
+		                <img src="#" class="img-fluid w-100 mb-3 img-thumbnail shadow-sm rounded-0">
 		            </a>
 		            <div class="content-info">
 		            	<h2 class="h4 text-muted font-italic">Masonry grid item</h2>
@@ -155,7 +110,7 @@
 
 			<section class="pb-5" id="influencer-content">
 
-			    <div class="container text-center">
+			    <div class=" text-center">
 			    	<div class="alert alert-dark mt-3" role="alert" style="display: none" id="loading-influencer-content"></div>
 			        <!-- Masonry grid -->
 			        <div class="gallery-wrapper content-gallery">

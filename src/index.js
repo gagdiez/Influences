@@ -13,7 +13,8 @@ window.logout = logout;
 
 // Harcoded influencer for now
 const spinner = '<i class="fas fa-sync fa-spin"></i>'; 
-let $influencerGrid, $contentGrid, $searchGrid;
+window.$contentGrid = null;
+let $influencerGrid, $searchGrid;
 let avatarPlaceholder, bannerPlaceholder;
 
 $(document).ready(function () {
@@ -135,26 +136,26 @@ $(document).ready(function () {
         theme: "minimal"
     });
 
-    $('#dismiss, .overlay, .nav-btn').on('click', function () {
-        $('#sidebar').removeClass('active');
-        $('.overlay').removeClass('active');
-    });
+    // $('#dismiss, .overlay, .nav-btn').on('click', function () {
+    //     $('#sidebar').removeClass('active');
+    //     $('.overlay').removeClass('active');
+    // });
 
-    $('#sidebarCollapse').on('click', function () {
-        $('#sidebar').addClass('active');
-        $('.overlay').addClass('active');
-        $('.collapse.in').toggleClass('in');
-        $('a[aria-expanded=true]').attr('aria-expanded', 'false');
-    });
+    // $('#sidebarCollapse').on('click', function () {
+    //     $('#sidebar').addClass('active');
+    //     $('.overlay').addClass('active');
+    //     $('.collapse.in').toggleClass('in');
+    //     $('a[aria-expanded=true]').attr('aria-expanded', 'false');
+    // });
 
 	// ------------------------------------------------------
     // INIT GRIDS 
     // ------------------------------------------------------
 
 
-    $influencerGrid = initiateGrid('.featured-influencers');
+    // $influencerGrid = initiateGrid('.featured-influencers');
     $contentGrid = initiateGrid('.content-gallery');
-    $searchGrid = initiateGrid('.search-gallery');
+    // $searchGrid = initiateGrid('.search-gallery');
 
 	// ------------------------------------------------------
     // INIT LIGHTBOX GALLERY 
@@ -162,19 +163,7 @@ $(document).ready(function () {
     
     $(document).on('click', '[data-toggle="lightbox"]', function(event) {
         event.preventDefault();
-        $(this).ekkoLightbox({
-        	onContentLoaded: function() {
-		         var container = $('.ekko-lightbox-container');
-		         var image = container.find('img');
-		         var windowHeight = $(window).height();
-		         if(image.height() + 200 > windowHeight) {
-		           image.css('height', windowHeight - 150);
-		           var dialog = container.parents('.modal-dialog');
-		           var padding = parseInt(dialog.find('.modal-body').css('padding'));
-		           dialog.css('max-width', image.width() + padding * 2 + 2);
-		         }
-		     }
-     	});
+        $(this).ekkoLightbox();
     });
         	
 
@@ -192,27 +181,21 @@ async function loginFlow() {
 	$("#logged-out").hide();
     $("#logged-in").show();
     $(".logged-user-name").html(accountId);
-	window.accountProfile = await getProfileOf(accountId)
-
-	if (accountProfile) {
-    	// is influencer, main page is profile
-    	showProfile();
-    	$("#become-influencer-btn").hide();
-    	$(".influencer-btn").show();
-    } else {
-    	// is not influencer, show subscription content
-    	$("#become-influencer-btn").show();
-    	$(".influencer-btn").hide();
-		showSubscriptionContent()
-    }
+	getProfileOf(accountId).then(profile=>{
+		window.accountProfile = profile;
+		if (accountProfile) {
+	    	$(".influencer-btn").show();
+	    } else {
+	    	$("#become-influencer-btn").show();
+	    }
+	})
+	showSubscriptionContent();
 }
 
 function logoutFlow(){
 	$("#logged-in").hide();
     $("#logged-out").show();
 }
-
-
 
 // ------------------------------------------------------
 // GRID MANAGEMENT
@@ -227,7 +210,7 @@ function initiateGrid(gridClass){
 
     // Initate imagesLoaded
     $grid.imagesLoaded().progress( function() {
-        $influencerGrid.masonry('layout');
+        $grid.masonry('layout');
     });
     return $grid;
 }
@@ -254,19 +237,14 @@ function uploadFilePreview(uploader,callback){
 
 window.searchInfluencers = async function(){
 	var name = $('#influencerSearch').val();
-	$('#searching-influencer').html('Searching influencer... '+spinner)
-	$('#searching-influencer').show();
+	$('#search-btn').html('Searching... '+spinner)
+	
 	var influencerProfile = await getProfileOf(name);
+	$('#search-btn').html('Search');
+	$('#influencerSearch').val("")
 	if (influencerProfile) {
-		$('#searching-influencer').hide();
 		showProfile(name,influencerProfile);
-	} else {
-		// couldn't find it 
-		$('#searching-influencer').html("No influencer with that name was found.");
-	}
-	// setInfluencersList(influencers,'found-influencer',$searchGrid);
-	// $("#search-results").show();
-	// $("#featured-influencers").hide();
+	} 
 }
 
 window.seeFeaturedInfluencers = function(){
@@ -287,9 +265,14 @@ window.subscribeToInfluencer = async function(){
 // ------------------------------------------------------
 
 window.showSubscriptionContent = async function showSubscriptionContent() {
+	$("#my-subs-banner").show();
+	$("#my-subs-banner").find(".lead").hide();
+	$("#my-subs-banner").find(".loading-subs").show();
 	var subs = await getMyInfluencers();
 	if (!subs.length){
-		return showFindInfluencers();
+		$("#my-subs-banner").find(".loading-subs").hide();
+		$("#my-subs-banner").find(".has-no-subs").show();
+		return;
 	}
 	$("#find-influencers").hide();
 	$("#influencer-profile").hide();
@@ -304,43 +287,44 @@ window.showSubscriptionContent = async function showSubscriptionContent() {
 		subsContent.forEach((posts,index)=>{
 			allContent = allContent.concat(addOwner(posts, subs[index]))
 		})
-		allContent.sort((c1,c2) => c1.creationDate > c2.creationDate)
+		$("#my-subs-banner").find(".loading-subs").hide();
+		$("#my-subs-banner").find(".has-subs").show();
 		showContentInGrid(allContent,false);
 	})
 }
 
-window.showFindInfluencers = function showFindInfluencers() {
-	$("#influencer-profile").hide();
-	$("#influencer-content").hide();
-	$("#search-results").hide();
-	$("#my-subs-banner").hide();
-	$("#find-influencers").show();
-	// TODO: show featured influencers
-	// var featured = serverGetFeatured();
-	// $("#featured-influencers").show();
-	// setInfluencersList(featured,'featured-influencer',$influencerGrid)
-	$("#featured-influencers").hide();
-	$("#discover-btn").hide();
+// window.showFindInfluencers = function showFindInfluencers() {
+// 	$("#influencer-profile").hide();
+// 	$("#influencer-content").hide();
+// 	$("#search-results").hide();
+// 	$("#my-subs-banner").hide();
+// 	$("#find-influencers").show();
+// 	// TODO: show featured influencers
+// 	// var featured = serverGetFeatured();
+// 	// $("#featured-influencers").show();
+// 	// setInfluencersList(featured,'featured-influencer',$influencerGrid)
+// 	$("#featured-influencers").hide();
+// 	$("#discover-btn").hide();
 	
-}
+// }
 
-function setInfluencersList(influencers,section,$grid){
-	$(`.${section}`).remove()
-	influencers.forEach(f=>{
-		var inf = $('.influencer-list-template').clone();
-		inf.find('img').attr('src',f.avatar)
-		inf.find('.influencer-link').attr('target',f.id);
-		inf.find('.influencer-name').html(f.name);
-		inf.removeClass('influencer-list-template');
-		inf.addClass(section);
-		$grid.append(inf).masonry( 'appended', inf ).masonry();
-	})
-	$(".influencer-link").click(async function(){
-		var influencer = $(this).attr('target');
-		var influencerProfile = await getProfileOf(influencer)
-		showProfile(influencer,influencerProfile);
-	})
-}
+// function setInfluencersList(influencers,section,$grid){
+// 	$(`.${section}`).remove()
+// 	influencers.forEach(f=>{
+// 		var inf = $('.influencer-list-template').clone();
+// 		inf.find('img').attr('src',f.avatar)
+// 		inf.find('.influencer-link').attr('target',f.id);
+// 		inf.find('.influencer-name').html(f.name);
+// 		inf.removeClass('influencer-list-template');
+// 		inf.addClass(section);
+// 		$grid.append(inf).masonry( 'appended', inf ).masonry();
+// 	})
+// 	$(".influencer-link").click(async function(){
+// 		var influencer = $(this).attr('target');
+// 		var influencerProfile = await getProfileOf(influencer)
+// 		showProfile(influencer,influencerProfile);
+// 	})
+// }
 
 window.showProfile = async function showProfile(influencerId,influencerProfile) {
 	if (!influencerId){
@@ -389,17 +373,18 @@ function addOwner(content, id){
 }
 
 function showContentInGrid(content,inProfile) {
-	console.log(content)
+	content.sort((c1,c2)=>c1.creationDate<c2.creationDate);
 	$(".single-content").remove();
-	$("#influencer-content").show();
 	content.forEach(c=>showSingleContent(c,inProfile));
     
 }
 
 function showSingleContent(content,inProfile) {
 	var newContent = $(".content-template").clone();
-	newContent.find('.main-content').attr('href',content.sialink);
-	newContent.find('img').attr('src',content.sialink);
+	newContent.find('.main-content').attr('href',content.sialink)
+	newContent.find('img').attr('src',content.sialink).on('load', function () {
+		$contentGrid.masonry();
+	});
 	newContent.find('h2').html(content.description);
 	let date = new Date(content.creationDate/1000000)
 	newContent.find('.small').html("Uploaded on "+date.toDateString());
@@ -426,9 +411,9 @@ function showSingleContent(content,inProfile) {
 			});
 		}
 	}
-	
 	newContent.addClass("single-content");
 	newContent.removeClass("content-template");
 	newContent.removeClass("d-none");
-	$contentGrid.append(newContent).masonry( 'appended', newContent ).masonry();
+	$contentGrid.append(newContent).masonry( 'appended', newContent );
+
 }
