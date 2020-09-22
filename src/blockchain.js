@@ -58,9 +58,9 @@ export async function getContentOf(influencer){
   return await contract.getContentOf({influencer})
 }
 
-export async function addToMyContent(sialink){
+export async function addToMyContent(sialink,description){
   // Returns true if everything goes right  
-  return await contract.addToMyContent({sialink})
+  return await contract.addToMyContent({sialink,description})
 }
 
 export async function deleteFromMyContent(sialink){

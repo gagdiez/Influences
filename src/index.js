@@ -277,7 +277,7 @@ window.seeFeaturedInfluencers = function(){
 window.subscribeToInfluencer = async function(){
 	var target = $(".subscribe-btn").attr('target');
 	var price = $(".subscribe-btn").attr('price');
-	await subscribeTo(target,price)
+	await subscribeTo(target,price);
 	var influencerProfile = await getProfileOf(target);
 	showProfile(target,influencerProfile);
 }
@@ -351,7 +351,7 @@ window.showProfile = async function showProfile(influencerId,influencerProfile) 
 	$("#influencer-avatar").attr('src',influencerProfile.avatar);
 	$("#influencer-banner").attr('src',influencerProfile.banner);
 	
-	$(".subscribe-btn").attr('target',influencerProfile.id);
+	$(".subscribe-btn").attr('target',influencerId);
 	$(".subscribe-btn").attr('price',influencerProfile.price);
 	$(".subscribe-btn").html(`Subscribe for ${influencerProfile.price}(N) per month to see all the content!`);
 	$(".subscribe-btn").hide();
