@@ -1,6 +1,24 @@
 /*
     DEMO STYLE
 */
+.banner{
+  overflow:hidden;
+  background-color:"#cccccc";
+  height:340px;
+}
+
+.banner img{
+  width:100%;
+  translate:0 -50%;
+}
+
+nav .btn{
+  font-size:1.5rem;
+}
+
+.container{
+  max-width:70%;
+}
 
 .content-info {
   transition: .5s ease;
@@ -42,18 +60,16 @@
 
 .avatar {
     position: relative;
-    top: -80px;
-    margin-bottom: -80px;
+    top:-105px;
+    margin-bottom:-105px;
 }
 .avatar img {
-    /*width: 100px;*/
-    /*height: 100px;*/
-    max-width: 200px;
-    max-height: 200px;
+    width: 200px;
+    height: 200px;
     object-fit: cover;
-    -webkit-border-radius: 50%;
-    -moz-border-radius: 50%;
-    border-radius: 50%;
+    -webkit-border-radius: 25%;
+    -moz-border-radius: 25%;
+    border-radius: 25%;
     border: 5px solid rgba(255,255,255,0.5);
 }
 
@@ -84,7 +100,6 @@ a:focus {
     background: #fff;
     border: none;
     border-radius: 0;
-    margin-bottom: 40px;
     box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
 }
 
