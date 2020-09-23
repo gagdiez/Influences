@@ -32,9 +32,9 @@ export async function initNEAR() {
   window.contract = new Contract(
     window.walletConnection.account(),
     nearConfig.contractName,
-    {viewMethods: ['getProfileOf'],
-     changeMethods: ['hasAccessTo', 'getContentOf', 'subscribeTo', 'getMyInfluencers',
-                     'addToMyContent', 'deleteFromMyContent', 'updateMyProfile']}
+    {viewMethods: [],
+     changeMethods: ['subscribeTo', 'getMyInfluencers', 'addToMyContent',
+                     'deleteFromMyContent', 'updateMyProfile', 'getProfileOf']}
   )
   return walletConnection.isSignedIn()
 }

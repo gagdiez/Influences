@@ -21,7 +21,9 @@ export const influencers_content = new PersistentMap<string, ContentList>("c")
 @nearBindgen
 export class Profile {
   constructor(public name:string, public banner:string, public avatar: string,
-              public description:string, public price:u128, public fans:u16=0){}
+              public description:string, public price:u128,
+              public content:Array<Content>,
+              public fans:u16=0, public hasAccess:bool=false){}
 }
 
 export const influencers_profile = new PersistentMap<string, Profile>("p")
@@ -33,3 +35,5 @@ export class InfluencerList {
   constructor(public influencers: Array<string>) {}
 }
 export const influencers_of_fan = new PersistentMap<string, InfluencerList>("i")
+
+export const influencer_nbr_fans = new PersistentMap<string, u16>('f')
