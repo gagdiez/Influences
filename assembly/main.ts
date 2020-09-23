@@ -96,8 +96,8 @@ export function getProfileOf(influencer:string): Profile | null{
 
 export function updateMyProfile(name:string, banner:string, avatar:string,
                                 description: string, price:u128):bool{
-  let new_profile = new Profile(name, banner, avatar, description,
-                                price, [], 0, false)
+  let new_profile = new Profile(context.sender, name, banner, avatar,
+                                description, price, [], 0, false)
 
   //Copy number of fans if the profiled existed already
   let my_profile = influencers_profile.get(context.sender)
