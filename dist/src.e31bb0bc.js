@@ -22589,8 +22589,8 @@ function _initNEAR() {
             window.accountId = window.walletConnection.getAccountId(); // Initializing contract APIs
 
             window.contract = new _nearApiJs.Contract(window.walletConnection.account(), nearConfig.contractName, {
-              viewMethods: ['getProfileOf'],
-              changeMethods: ['hasAccessTo', 'getContentOf', 'subscribeTo', 'getMyInfluencers', 'addToMyContent', 'deleteFromMyContent', 'updateMyProfile']
+              viewMethods: [],
+              changeMethods: ['subscribeTo', 'getMyInfluencers', 'addToMyContent', 'deleteFromMyContent', 'updateMyProfile', 'getProfileOf']
             });
             return _context.abrupt("return", walletConnection.isSignedIn());
 
@@ -22927,9 +22927,9 @@ $(document).ready(function () {
   // ADD CONTENT EVENTS
   // ------------------------------------------------------
   $("#upload-content-input").change(function () {
-    uploadFilePreview(this, function (preview) {
-      $('#upload-content-preview').attr('src', preview);
-      $('#upload-content-preview').show();
+    uploadFilePreview(this, function (preview, type) {
+      $("#upload-content-preview-".concat(type)).attr('src', preview);
+      $("#upload-content-preview-".concat(type)).show();
       $('.btn-upload').hide();
     });
   });
@@ -22976,7 +22976,10 @@ $(document).ready(function () {
     }, _callee);
   })));
   $("#add-content-modal").on("show.bs.modal", function () {
-    $('#upload-content-preview').hide();
+    $('#upload-content-preview-image').attr('src', "#");
+    $('#upload-content-preview-video').attr('src', "#");
+    $('#upload-content-preview-image').hide();
+    $('#upload-content-preview-video').hide();
     $("#upload-content-input").val('');
     $('.btn-upload').show();
   }); // ------------------------------------------------------
@@ -23127,7 +23130,9 @@ function _loginFlow() {
             $("#logged-out").hide();
             $("#logged-in").show();
             $(".logged-user-name").html(accountId);
+            console.log("Getting profile");
             (0, _blockchain.getProfileOf)(accountId).then(function (profile) {
+              console.log(profile);
               window.accountProfile = profile;
 
               if (accountProfile) {
@@ -23136,9 +23141,10 @@ function _loginFlow() {
                 $("#become-influencer-btn").show();
               }
             });
+            console.log("Subscription content");
             showSubscriptionContent();
 
-          case 5:
+          case 7:
           case "end":
             return _context9.stop();
         }
@@ -23175,13 +23181,23 @@ function initiateGrid(gridClass) {
 function uploadFilePreview(uploader, callback) {
   // upload file in frontend and show preview
   if (uploader.files && uploader.files[0]) {
-    var reader = new FileReader();
+    console.log(uploader.files[0]);
 
-    reader.onload = function (e) {
-      callback(e.target.result);
-    };
+    if (uploader.files[0].type.includes('video')) {
+      var fileUrl = URL.createObjectURL(uploader.files[0]);
+      callback(fileUrl, 'video');
+    } else {
+      var reader = new FileReader();
 
-    reader.readAsDataURL(uploader.files[0]); // convert to base64 string
+      reader.onload = function (e) {
+        callback(e.target.result, 'image');
+      };
+
+      reader.readAsDataURL(uploader.files[0]); // convert to base64 string
+    } //  	var $source = $('#video_here');
+    // $source[0].src = URL.createObjectURL(this.files[0]);
+    // $source.parent()[0].load();
+
   }
 } // ------------------------------------------------------
 // FIND INFLUENCERS
@@ -23257,17 +23273,19 @@ window.showSubscriptionContent = /*#__PURE__*/function () {
       while (1) {
         switch (_context6.prev = _context6.next) {
           case 0:
+            $("#influencer-profile").hide();
+            $("#influencer-content").hide();
             $("#my-subs-banner").show();
             $("#my-subs-banner").find(".lead").hide();
             $("#my-subs-banner").find(".loading-subs").show();
-            _context6.next = 5;
+            _context6.next = 7;
             return (0, _blockchain.getMyInfluencers)();
 
-          case 5:
+          case 7:
             subs = _context6.sent;
 
             if (subs.length) {
-              _context6.next = 10;
+              _context6.next = 12;
               break;
             }
 
@@ -23275,28 +23293,27 @@ window.showSubscriptionContent = /*#__PURE__*/function () {
             $("#my-subs-banner").find(".has-no-subs").show();
             return _context6.abrupt("return");
 
-          case 10:
-            $("#find-influencers").hide();
-            $("#influencer-profile").hide();
+          case 12:
+            // $("#find-influencers").hide();
             $("#my-subs-banner").show();
             content = [];
-            subs.forEach(function (influencer) {
-              content.push((0, _blockchain.getContentOf)(influencer));
+            subs.forEach(function (profile) {
+              console.log(profile);
+              content = content.concat(addOwner(profile.content, profile.id, profile.name));
             });
             console.log(subs);
-            console.log(content);
-            Promise.all(content).then(function (subsContent) {
-              console.log(subsContent);
-              var allContent = [];
-              subsContent.forEach(function (posts, index) {
-                allContent = allContent.concat(addOwner(posts, subs[index]));
-              });
-              $("#my-subs-banner").find(".loading-subs").hide();
-              $("#my-subs-banner").find(".has-subs").show();
-              showContentInGrid(allContent, false);
-            });
+            console.log(content); // Promise.all(content).then(subsContent => {
+            // console.log(subsContent);
+            // var allContent = [];
+            // subsContent.forEach((posts,index)=>{
+            // 	allContent = allContent.concat(addOwner(posts, subs[index]))
+            // })
 
-          case 18:
+            $("#my-subs-banner").find(".loading-subs").hide();
+            $("#my-subs-banner").find(".has-subs").show();
+            showContentInGrid(content, false); // })
+
+          case 20:
           case "end":
             return _context6.stop();
         }
@@ -23341,66 +23358,80 @@ window.showSubscriptionContent = /*#__PURE__*/function () {
 // }
 
 
+function profileChanged(p1, p2) {
+  var props = ['name', 'description', 'banner', 'avatar', 'fans'];
+  var isEqual = props.reduce(function (prev, prop) {
+    return prev && p1[prop] === p2[prop];
+  }, true);
+
+  function sameContent(c1, c2) {
+    if (c1.length != c2.length) return false;
+    return c1.reduce(function (prev, c, i) {
+      return prev && c1[i].sialink === c2[i].sialink;
+    }, true);
+  }
+
+  return !isEqual || !sameContent(p1.content, p2.content);
+}
+
 window.showProfile = /*#__PURE__*/function () {
   var _showProfile = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee7(influencerId, influencerProfile) {
-    var hasAcces, content;
+    var loaderCounter, showAfterTwo;
     return regeneratorRuntime.wrap(function _callee7$(_context7) {
       while (1) {
         switch (_context7.prev = _context7.next) {
           case 0:
+            showAfterTwo = function _showAfterTwo() {
+              loaderCounter++;
+
+              if (loaderCounter == 2) {
+                $("#influencer-profile").show();
+
+                if (!influencerProfile.hasAccess) {
+                  $(".subscribe-btn").show(); // $("#influencer-content").hide();
+                } else {
+                  var content = influencerProfile.content; // var content = await getContentOf(influencerId);
+
+                  if (!content.length) {
+                    $('#loading-influencer-content').show();
+                    $('#loading-influencer-content').html("".concat(influencerProfile.name, " doesn't have any content yet!"));
+                  } else {
+                    showContentInGrid(addOwner(content, influencerId, influencerProfile.name), true);
+                  }
+                }
+              }
+            };
+
             if (!influencerId) {
               influencerId = accountId;
               influencerProfile = accountProfile;
-            }
+              (0, _blockchain.getProfileOf)(accountId).then(function (profile) {
+                // show profile as it is but look for changes
+                if (profileChanged(accountProfile, profile)) {
+                  accountProfile = profile;
+                  showProfile(accountId, accountProfile);
+                }
+              });
+            } // $("#find-influencers").hide();
 
-            $("#find-influencers").hide();
+
             $("#my-subs-banner").hide();
             $(".influencer-name").html(influencerProfile.name);
             $(".influencer-description").html(influencerProfile.description);
             $("#influencer-followers").html(influencerProfile.fans);
-            $("#influencer-avatar").attr('src', influencerProfile.avatar);
-            $("#influencer-banner").attr('src', influencerProfile.banner);
             $(".subscribe-btn").attr('target', influencerId);
             $(".subscribe-btn").attr('price', influencerProfile.price);
             $(".subscribe-btn").html("Subscribe for ".concat(influencerProfile.price, "(N) per month to see all the content!"));
             $(".subscribe-btn").hide();
-            $(".single-content").remove();
-            $("#influencer-content").show();
-            $('#loading-influencer-content').show();
-            $('#loading-influencer-content').html("Loading content... " + spinner);
-            $("#influencer-profile").show();
-            _context7.next = 19;
-            return (0, _blockchain.hasAccessTo)(influencerId);
-
-          case 19:
-            hasAcces = _context7.sent;
-
-            if (hasAcces) {
-              _context7.next = 25;
-              break;
-            }
-
-            $(".subscribe-btn").show();
             $("#influencer-content").hide();
-            _context7.next = 29;
-            break;
+            $('#loading-influencer-content').hide(); // $('#loading-influencer-content').show();
+            // $('#loading-influencer-content').html("Loading content... "+spinner);
 
-          case 25:
-            _context7.next = 27;
-            return (0, _blockchain.getContentOf)(influencerId);
+            loaderCounter = 0;
+            $("#influencer-avatar").attr('src', influencerProfile.avatar).on('load', showAfterTwo);
+            $("#influencer-banner").attr('src', influencerProfile.banner).on('load', showAfterTwo); // var hasAcces = await hasAccessTo(influencerId);
 
-          case 27:
-            content = _context7.sent;
-
-            if (!content.length) {
-              $("#influencer-content").hide();
-              $('#loading-influencer-content').html("".concat(influencerProfile.name, " doesn't have any content yet!"));
-            } else {
-              $('#loading-influencer-content').hide();
-              showContentInGrid(addOwner(content, influencerId), true);
-            }
-
-          case 29:
+          case 15:
           case "end":
             return _context7.stop();
         }
@@ -23415,10 +23446,12 @@ window.showProfile = /*#__PURE__*/function () {
   return showProfile;
 }();
 
-function addOwner(content, id) {
+function addOwner(content, id, name) {
+  if (!name) name = id;
   return content.map(function (c) {
     return _objectSpread({
-      owner: id
+      ownerId: id,
+      ownerName: name
     }, c);
   });
 }
@@ -23428,24 +23461,47 @@ function showContentInGrid(content, inProfile) {
     return c1.creationDate < c2.creationDate;
   });
   $(".single-content").remove();
+  $("#influencer-content").show();
   content.forEach(function (c) {
     return showSingleContent(c, inProfile);
+  });
+}
+
+function checkSiaLinkType(sialink) {
+  return new Promise(function (resolve) {
+    $.ajax({
+      type: "HEAD",
+      url: sialink,
+      success: function success(message, text, response) {
+        resolve(response.getResponseHeader('Content-Type'));
+      }
+    });
   });
 }
 
 function showSingleContent(content, inProfile) {
   var newContent = $(".content-template").clone();
   newContent.find('.main-content').attr('href', content.sialink);
-  newContent.find('img').attr('src', content.sialink).on('load', function () {
-    $contentGrid.masonry();
+  checkSiaLinkType(content.sialink).then(function (contentType) {
+    if (contentType.includes('image')) {
+      newContent.find('video').remove();
+      newContent.find('img').attr('src', content.sialink).on('load', function () {
+        $contentGrid.masonry();
+      });
+    } else {
+      newContent.find('img').remove();
+      newContent.find('video').attr('src', content.sialink);
+      newContent.find('video').attr('type', contentType);
+      $contentGrid.masonry();
+    }
   });
   newContent.find('h2').html(content.description);
   var date = new Date(content.creationDate / 1000000);
   newContent.find('.small').html("Uploaded on " + date.toDateString());
 
   if (!inProfile) {
-    newContent.find('.visit-influencer-btn').attr('target', content.owner);
-    newContent.find('.visit-influencer-btn').html("Visit " + content.owner);
+    newContent.find('.visit-influencer-btn').attr('target', content.ownerId);
+    newContent.find('.visit-influencer-btn').html("Visit " + content.ownerName);
     newContent.find('.remove-content-btn').remove();
     newContent.find('.visit-influencer-btn').click( /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee8() {
       var target, influencerProfile;
@@ -23471,7 +23527,7 @@ function showSingleContent(content, inProfile) {
   } else {
     newContent.find('.visit-influencer-btn').remove();
 
-    if (content.owner != accountId) {
+    if (content.ownerId != accountId) {
       newContent.find('.remove-content-btn').remove();
     } else {
       newContent.find('.remove-content-btn').attr('target', content.sialink);
@@ -23517,7 +23573,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "35393" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "36795" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

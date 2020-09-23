@@ -2,8 +2,9 @@
 import 'regenerator-runtime/runtime'
 
 
-import { initNEAR, login, logout, hasAccessTo, 
-		getContentOf, getProfileOf, getMyInfluencers,
+import { initNEAR, login, logout,
+		// getContentOf, hasAccessTo, 
+		getProfileOf, getMyInfluencers,
          subscribeTo, upload_file_to_sia, updateMyProfile,
          addToMyContent,deleteFromMyContent } from './blockchain'
 
@@ -24,10 +25,10 @@ $(document).ready(function () {
     // ------------------------------------------------------
     
     $("#upload-content-input").change(function() {
-    	uploadFilePreview(this,(preview)=>{
-    		$('#upload-content-preview').attr('src', preview);
-		      $('#upload-content-preview').show();
-		      $('.btn-upload').hide();
+    	uploadFilePreview(this,(preview,type)=>{
+    		$(`#upload-content-preview-${type}`).attr('src', preview);
+	      	$(`#upload-content-preview-${type}`).show();
+		    $('.btn-upload').hide();
     	});
 	});
 
@@ -54,7 +55,10 @@ $(document).ready(function () {
 	});
 
 	$("#add-content-modal").on("show.bs.modal", function () { 
-		$('#upload-content-preview').hide();
+		$('#upload-content-preview-image').attr('src',"#");
+		$('#upload-content-preview-video').attr('src',"#");
+		$('#upload-content-preview-image').hide();
+		$('#upload-content-preview-video').hide();
         $("#upload-content-input").val('');
         $('.btn-upload').show();
 	})
@@ -181,7 +185,9 @@ async function loginFlow() {
 	$("#logged-out").hide();
     $("#logged-in").show();
     $(".logged-user-name").html(accountId);
+    console.log("Getting profile")
 	getProfileOf(accountId).then(profile=>{
+		console.log(profile)
 		window.accountProfile = profile;
 		if (accountProfile) {
 	    	$(".influencer-btn").show();
@@ -189,6 +195,7 @@ async function loginFlow() {
 	    	$("#become-influencer-btn").show();
 	    }
 	})
+	console.log("Subscription content")
 	showSubscriptionContent();
 }
 
@@ -223,11 +230,23 @@ function initiateGrid(gridClass){
 function uploadFilePreview(uploader,callback){
 	// upload file in frontend and show preview
 	if (uploader.files && uploader.files[0]) {
-	    var reader = new FileReader();
-	    reader.onload = function(e) {
-	      callback(e.target.result)
-	    }
-	    reader.readAsDataURL(uploader.files[0]); // convert to base64 string
+		console.log(uploader.files[0]);
+		if (uploader.files[0].type.includes('video')){
+			var fileUrl = URL.createObjectURL(uploader.files[0]);
+   			
+   			callback(fileUrl,'video')
+		} else {
+			var reader = new FileReader();
+		    reader.onload = function(e) {
+		      callback(e.target.result,'image')
+		    }
+		    reader.readAsDataURL(uploader.files[0]); // convert to base64 string
+		}
+
+	   //  	var $source = $('#video_here');
+		  // $source[0].src = URL.createObjectURL(this.files[0]);
+		  // $source.parent()[0].load();
+	    
     }
 }
 
@@ -265,7 +284,10 @@ window.subscribeToInfluencer = async function(){
 // ------------------------------------------------------
 
 window.showSubscriptionContent = async function showSubscriptionContent() {
+	$("#influencer-profile").hide();
+	$("#influencer-content").hide();
 	$("#my-subs-banner").show();
+
 	$("#my-subs-banner").find(".lead").hide();
 	$("#my-subs-banner").find(".loading-subs").show();
 	var subs = await getMyInfluencers();
@@ -274,23 +296,26 @@ window.showSubscriptionContent = async function showSubscriptionContent() {
 		$("#my-subs-banner").find(".has-no-subs").show();
 		return;
 	}
-	$("#find-influencers").hide();
-	$("#influencer-profile").hide();
+	// $("#find-influencers").hide();
+	
 	$("#my-subs-banner").show();
 	let content = [];
-	subs.forEach(influencer=>{content.push(getContentOf(influencer))});
+	subs.forEach(profile=>{
+		console.log(profile);
+		content = content.concat(addOwner(profile.content,profile.id,profile.name))
+	});
 	console.log(subs)
 	console.log(content)
-	Promise.all(content).then(subsContent => {
-		console.log(subsContent);
-		var allContent = [];
-		subsContent.forEach((posts,index)=>{
-			allContent = allContent.concat(addOwner(posts, subs[index]))
-		})
-		$("#my-subs-banner").find(".loading-subs").hide();
-		$("#my-subs-banner").find(".has-subs").show();
-		showContentInGrid(allContent,false);
-	})
+	// Promise.all(content).then(subsContent => {
+		// console.log(subsContent);
+		// var allContent = [];
+		// subsContent.forEach((posts,index)=>{
+		// 	allContent = allContent.concat(addOwner(posts, subs[index]))
+		// })
+	$("#my-subs-banner").find(".loading-subs").hide();
+	$("#my-subs-banner").find(".has-subs").show();
+	showContentInGrid(content,false);
+	// })
 }
 
 // window.showFindInfluencers = function showFindInfluencers() {
@@ -326,71 +351,124 @@ window.showSubscriptionContent = async function showSubscriptionContent() {
 // 	})
 // }
 
+function profileChanged(p1,p2){
+	var props = ['name','description','banner','avatar','fans'];
+	var isEqual = props.reduce((prev,prop)=> {return prev && p1[prop]===p2[prop]},true);
+	function sameContent(c1,c2){
+		if (c1.length != c2.length) return false;
+		return c1.reduce((prev,c,i)=>{return prev && c1[i].sialink === c2[i].sialink},true)
+	}
+	return !isEqual || !(sameContent(p1.content, p2.content)); 
+}
+
 window.showProfile = async function showProfile(influencerId,influencerProfile) {
 	if (!influencerId){
 		influencerId = accountId;
 		influencerProfile = accountProfile;
+		getProfileOf(accountId).then(profile=>{
+			// show profile as it is but look for changes
+			if (profileChanged(accountProfile,profile)){
+				accountProfile = profile;
+				showProfile(accountId,accountProfile);
+			} 
+		});
 	}
-	$("#find-influencers").hide();
+	// $("#find-influencers").hide();
 	$("#my-subs-banner").hide();
 	
 	$(".influencer-name").html(influencerProfile.name);
 	$(".influencer-description").html(influencerProfile.description);
 	$("#influencer-followers").html(influencerProfile.fans);
-
-	$("#influencer-avatar").attr('src',influencerProfile.avatar);
-	$("#influencer-banner").attr('src',influencerProfile.banner);
+	
 	
 	$(".subscribe-btn").attr('target',influencerId);
 	$(".subscribe-btn").attr('price',influencerProfile.price);
 	$(".subscribe-btn").html(`Subscribe for ${influencerProfile.price}(N) per month to see all the content!`);
 	$(".subscribe-btn").hide();
 
-	$(".single-content").remove();
-	$("#influencer-content").show();
+	$("#influencer-content").hide();
+	$('#loading-influencer-content').hide();
+	// $('#loading-influencer-content').show();
+	// $('#loading-influencer-content').html("Loading content... "+spinner);
 
-	$('#loading-influencer-content').show();
-	$('#loading-influencer-content').html("Loading content... "+spinner);
-	$("#influencer-profile").show();
-	var hasAcces = await hasAccessTo(influencerId);
-	if (!hasAcces) {
-		$(".subscribe-btn").show();
-		$("#influencer-content").hide();
-	} else {
-		var content = await getContentOf(influencerId);
-		if (!content.length){
-			$("#influencer-content").hide();
-			$('#loading-influencer-content').html(`${influencerProfile.name} doesn't have any content yet!`)
-		} else {
-			$('#loading-influencer-content').hide();
-			showContentInGrid(addOwner(content,influencerId),true);
+	var loaderCounter = 0;
+	function showAfterTwo(){
+		loaderCounter++;
+		if(loaderCounter==2){
+			$("#influencer-profile").show();
+			if (!influencerProfile.hasAccess) {
+				$(".subscribe-btn").show();
+				// $("#influencer-content").hide();
+			} else {
+				var content = influencerProfile.content;
+				// var content = await getContentOf(influencerId);
+				if (!content.length){
+					$('#loading-influencer-content').show()
+					$('#loading-influencer-content').html(`${influencerProfile.name} doesn't have any content yet!`)
+				} else {
+					showContentInGrid(addOwner(content,influencerId,influencerProfile.name),true);
+				}
+			}
 		}
 	}
+	$("#influencer-avatar").attr('src',influencerProfile.avatar).on('load', showAfterTwo);
+	$("#influencer-banner").attr('src',influencerProfile.banner).on('load', showAfterTwo);
+
+	
+	// var hasAcces = await hasAccessTo(influencerId);
+	
 }
 
-function addOwner(content, id){
-	return content.map(c=>{return {owner:id,...c} })
+function addOwner(content, id,name){
+	if (!name) name = id;
+	return content.map(c=>{return {ownerId:id,ownerName:name,...c} })
 }
 
 function showContentInGrid(content,inProfile) {
 	content.sort((c1,c2)=>c1.creationDate<c2.creationDate);
 	$(".single-content").remove();
+	$("#influencer-content").show();
 	content.forEach(c=>showSingleContent(c,inProfile));
     
+}
+
+function checkSiaLinkType(sialink){
+	return new Promise(resolve=>{
+		$.ajax({
+		  type: "HEAD",
+		  url : sialink,
+		  success: function(message,text,response){
+		  	resolve(response.getResponseHeader('Content-Type'))
+		  } 
+		});
+	})
+	
 }
 
 function showSingleContent(content,inProfile) {
 	var newContent = $(".content-template").clone();
 	newContent.find('.main-content').attr('href',content.sialink)
-	newContent.find('img').attr('src',content.sialink).on('load', function () {
-		$contentGrid.masonry();
-	});
+	checkSiaLinkType(content.sialink).then(contentType=>{
+		if (contentType.includes('image')){
+			newContent.find('video').remove();	
+			newContent.find('img').attr('src',content.sialink).on('load', function () {
+				$contentGrid.masonry();
+			});
+		} else {
+			newContent.find('img').remove();
+			newContent.find('video').attr('src',content.sialink)
+			newContent.find('video').attr('type',contentType);
+			$contentGrid.masonry();
+		}
+	})
+	
+	
 	newContent.find('h2').html(content.description);
 	let date = new Date(content.creationDate/1000000)
 	newContent.find('.small').html("Uploaded on "+date.toDateString());
 	if (!inProfile){
-		newContent.find('.visit-influencer-btn').attr('target',content.owner);
-		newContent.find('.visit-influencer-btn').html("Visit "+content.owner);
+		newContent.find('.visit-influencer-btn').attr('target',content.ownerId);
+		newContent.find('.visit-influencer-btn').html("Visit "+content.ownerName);
 		newContent.find('.remove-content-btn').remove();
 		newContent.find('.visit-influencer-btn').click(async function(){
 			var target = $(this).attr('target');
@@ -399,7 +477,7 @@ function showSingleContent(content,inProfile) {
 		});
 	} else {
 		newContent.find('.visit-influencer-btn').remove();
-		if (content.owner != accountId){
+		if (content.ownerId != accountId){
 			newContent.find('.remove-content-btn').remove();
 		} else {
 			newContent.find('.remove-content-btn').attr('target',content.sialink);
