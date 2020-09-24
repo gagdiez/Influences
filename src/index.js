@@ -184,6 +184,7 @@ $(document).ready(function () {
 async function loginFlow() {
 	$("#logged-out").hide();
     $("#logged-in").show();
+    $(".logged-user-name").html(accountId);
     console.log("Getting profile")
 	getProfileOf(accountId).then(profile=>{
 		console.log(profile)

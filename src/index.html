@@ -55,15 +55,16 @@
                            <i class="fas fa-plus"></i>
                         </a>
                     </li>
-	                <li class="nav-item mr-sm-2"><a type="button" data-toggle="modal" data-target="#edit-profile-modal" href="#" id="become-influencer-btn" style="display: none" class="btn btn-outline-ligh">Become an influencer</a></li>
 			    </ul>
                 <div class="dropdown">
-                  <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="fas fa-cogs"></i>
+                  <button class="btn" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="logged-user-name"></span>
+                    <i class="fas fa-caret-down"></i>
                   </button>
                   <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <a class="dropdown-item" onclick="showProfile()" href="#">My Profile</a>
-                    <a class="dropdown-item" data-toggle="modal" data-target="#edit-profile-modal" href="#">Edit Profile</a>
+	                <a class="dropdown-item" data-toggle="modal" data-target="#edit-profile-modal" href="#" id="become-influencer-btn" style="display: none">Become an influencer</a>
+                    <a class="dropdown-item influencer-btn" onclick="showProfile()" href="#" style="display: none">My Profile</a>
+                    <a class="dropdown-item influencer-btn" data-toggle="modal" data-target="#edit-profile-modal" href="#" style="display: none">Edit Profile</a>
                     <a class="dropdown-item" onclick="logout()" href="#">Logout</a>
                   </div>
                 </div>
