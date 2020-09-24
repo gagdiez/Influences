@@ -3,7 +3,6 @@ import 'regenerator-runtime/runtime'
 
 
 import { initNEAR, login, logout,
-		// getContentOf, hasAccessTo, 
 		getProfileOf, getMyInfluencers,
          subscribeTo, upload_file_to_sia, updateMyProfile,
          addToMyContent,deleteFromMyContent } from './blockchain'
@@ -79,87 +78,81 @@ $(document).ready(function () {
     	});
 	});
 
-    $("#edit-profile-modal").on("show.bs.modal", async function () { 
-    	// set profile to edit
-    	let influencerProfile = await getProfileOf(accountId);
-    	if (!influencerProfile){
-    		influencerProfile = {
-    			name: "",
-    			profile: "",
-    			price: 30,
-    			avatar: avatarPlaceholder,
-    			banner: bannerPlaceholder
-    		}
-    	} 
-		$("#influencer-name-input").val(influencerProfile.name)
-		$("#influencer-profile-input").val(influencerProfile.profile)
-		$("#influencer-price-input").val(influencerProfile.price)
-		$("#edit-avatar-img").attr('src',influencerProfile.avatar)
-		$("#edit-banner-img").attr('src',influencerProfile.banner)
-		
-	});
 
 	$("#edit-profile-save").click(function(){
 		var name = $("#influencer-name-input").val();
 		var description = $("#influencer-profile-input").val();
 		var price = $("#influencer-price-input").val();
-		var avatarFiles = $("#upload-avatar-input").prop('files');
-		var bannerFiles = $("#upload-banner-input").prop('files');
+		var avatar = accountProfile.avatar;
+		var banner = accountProfile.banner;
+
+		async function updateProfile(){
+			await updateMyProfile(name, banner, avatar, description, price)
+			accountProfile = await getProfileOf(accountId);
+			$("#edit-profile-modal").modal('hide');
+			$("#edit-profile-save").html("Save changes");
+			showProfile();
+		}
 		
 		if ($('#become-influencer-btn').is(":visible")){
 			$("#become-influencer-btn").hide();
     		$(".influencer-btn").show();
 		}
 		
-		
-		if (avatarFiles && avatarFiles[0]
-			&& bannerFiles && bannerFiles[0]){
-			var uploads = [
-				upload_file_to_sia(avatarFiles[0]),
-				upload_file_to_sia(bannerFiles[0])
-			]
-			$("#edit-profile-save").html('Saving... '+spinner);
-			Promise.all(uploads).then(async links => {
-				await updateMyProfile(name, 'https://siasky.net/'+links[1], 'https://siasky.net/'+links[0], description, price)
-				accountProfile = await getProfileOf(accountId);
-				$("#edit-profile-modal").modal('hide');
-				$("#edit-profile-save").html("Save changes");
-				showProfile();
-			})
-		} else {
-			console.log("no avatar or banner")
-			// error no avatar or banner
+		var avatarFiles = $("#upload-avatar-input").prop('files');
+		var bannerFiles = $("#upload-banner-input").prop('files');
+		var uploads = {keys:{},files:[]};
+		if (avatarFiles && avatarFiles[0]){
+			uploads.keys.avatar = true;
+			uploads.files.push(upload_file_to_sia(avatarFiles[0]))
 		}
-	})
+		if (bannerFiles && bannerFiles[0]){
+			uploads.keys.banner = true;
+			uploads.files.push(upload_file_to_sia(bannerFiles[0]))
+		}
+		if (uploads.files.length==0){
+			// nothing to upload;
+			return updateProfile();
+		}
+		Promise.all(uploads.files).then(async links => {
+			$("#edit-profile-save").html("Saving... "+spinner);
+			if (uploads.keys.avatar){
+				avatar = 'https://siasky.net/'+links[0];
+				if (uploads.keys.banner){
+					banner = 'https://siasky.net/'+links[1];
+				}
+			} else {
+				banner = 'https://siasky.net/'+links[0];
+			}
+			updateProfile();
+		})
+	});
+
 
 	// ------------------------------------------------------
-    // INIT SIDEBAR 
+    // SEARCH BAR
     // ------------------------------------------------------
 
-	$("#sidebar").mCustomScrollbar({
-        theme: "minimal"
-    });
-
-    // $('#dismiss, .overlay, .nav-btn').on('click', function () {
-    //     $('#sidebar').removeClass('active');
-    //     $('.overlay').removeClass('active');
-    // });
-
-    // $('#sidebarCollapse').on('click', function () {
-    //     $('#sidebar').addClass('active');
-    //     $('.overlay').addClass('active');
-    //     $('.collapse.in').toggleClass('in');
-    //     $('a[aria-expanded=true]').attr('aria-expanded', 'false');
-    // });
+	$("#influencerSearch").on('keyup', function (e) {
+	    if (e.key === 'Enter' || e.keyCode === 13) {
+	        searchInfluencers()
+	    }
+	});
 
 	// ------------------------------------------------------
     // INIT GRIDS 
     // ------------------------------------------------------
 
+    $contentGrid = $('.content-gallery').masonry({
+        temSelector: '.grid-item',
+        columnWidth: '.grid-sizer',
+        percentPosition: true,
+    });
 
-    // $influencerGrid = initiateGrid('.featured-influencers');
-    $contentGrid = initiateGrid('.content-gallery');
-    // $searchGrid = initiateGrid('.search-gallery');
+    // Initate imagesLoaded
+    $contentGrid.imagesLoaded().progress( function() {
+        $contentGrid.masonry('layout');
+    });
 
 	// ------------------------------------------------------
     // INIT LIGHTBOX GALLERY 
@@ -205,24 +198,6 @@ function logoutFlow(){
 }
 
 // ------------------------------------------------------
-// GRID MANAGEMENT
-// ------------------------------------------------------
-
-function initiateGrid(gridClass){
-	var $grid = $(gridClass).masonry({
-        temSelector: '.grid-item',
-        columnWidth: '.grid-sizer',
-        percentPosition: true,
-    });
-
-    // Initate imagesLoaded
-    $grid.imagesLoaded().progress( function() {
-        $grid.masonry('layout');
-    });
-    return $grid;
-}
-
-// ------------------------------------------------------
 // FILE MANAGEMENT
 // ------------------------------------------------------
 
@@ -242,10 +217,6 @@ function uploadFilePreview(uploader,callback){
 		    }
 		    reader.readAsDataURL(uploader.files[0]); // convert to base64 string
 		}
-
-	   //  	var $source = $('#video_here');
-		  // $source[0].src = URL.createObjectURL(this.files[0]);
-		  // $source.parent()[0].load();
 	    
     }
 }
@@ -256,10 +227,11 @@ function uploadFilePreview(uploader,callback){
 
 window.searchInfluencers = async function(){
 	var name = $('#influencerSearch').val();
-	$('#search-btn').html('Searching... '+spinner)
+	$('#influencerSearch').val("Searching...");
+	// $('#search-btn').html('Searching... '+spinner)
 	
 	var influencerProfile = await getProfileOf(name);
-	$('#search-btn').html('Search');
+	// $('#search-btn').html('Search');
 	$('#influencerSearch').val("")
 	if (influencerProfile) {
 		showProfile(name,influencerProfile);
@@ -297,7 +269,6 @@ window.showSubscriptionContent = async function showSubscriptionContent() {
 		$("#my-subs-banner").find(".has-no-subs").show();
 		return;
 	}
-	// $("#find-influencers").hide();
 	
 	$("#my-subs-banner").show();
 	let content = [];
@@ -305,52 +276,11 @@ window.showSubscriptionContent = async function showSubscriptionContent() {
 		console.log(profile);
 		content = content.concat(addOwner(profile.content,profile.id,profile.name))
 	});
-	console.log(subs)
-	console.log(content)
-	// Promise.all(content).then(subsContent => {
-		// console.log(subsContent);
-		// var allContent = [];
-		// subsContent.forEach((posts,index)=>{
-		// 	allContent = allContent.concat(addOwner(posts, subs[index]))
-		// })
+
 	$("#my-subs-banner").find(".loading-subs").hide();
 	$("#my-subs-banner").find(".has-subs").show();
 	showContentInGrid(content,false);
-	// })
 }
-
-// window.showFindInfluencers = function showFindInfluencers() {
-// 	$("#influencer-profile").hide();
-// 	$("#influencer-content").hide();
-// 	$("#search-results").hide();
-// 	$("#my-subs-banner").hide();
-// 	$("#find-influencers").show();
-// 	// TODO: show featured influencers
-// 	// var featured = serverGetFeatured();
-// 	// $("#featured-influencers").show();
-// 	// setInfluencersList(featured,'featured-influencer',$influencerGrid)
-// 	$("#featured-influencers").hide();
-// 	$("#discover-btn").hide();
-	
-// }
-
-// function setInfluencersList(influencers,section,$grid){
-// 	$(`.${section}`).remove()
-// 	influencers.forEach(f=>{
-// 		var inf = $('.influencer-list-template').clone();
-// 		inf.find('img').attr('src',f.avatar)
-// 		inf.find('.influencer-link').attr('target',f.id);
-// 		inf.find('.influencer-name').html(f.name);
-// 		inf.removeClass('influencer-list-template');
-// 		inf.addClass(section);
-// 		$grid.append(inf).masonry( 'appended', inf ).masonry();
-// 	})
-// 	$(".influencer-link").click(async function(){
-// 		var influencer = $(this).attr('target');
-// 		var influencerProfile = await getProfileOf(influencer)
-// 		showProfile(influencer,influencerProfile);
-// 	})
-// }
 
 function profileChanged(p1,p2){
 	var props = ['name','description','banner','avatar','fans'];
@@ -360,6 +290,32 @@ function profileChanged(p1,p2){
 		return c1.reduce((prev,c,i)=>{return prev && c1[i].sialink === c2[i].sialink},true)
 	}
 	return !isEqual || !(sameContent(p1.content, p2.content)); 
+}
+
+
+window.editProfile = async function editProfile(){
+	let influencerProfile = await getProfileOf(accountId);
+	if (!influencerProfile){
+		influencerProfile = {
+			name: "",
+			profile: "",
+			price: 30,
+			avatar: avatarPlaceholder,
+			banner: bannerPlaceholder
+		}
+	} 
+	$("#influencer-name-input").val(influencerProfile.name)
+	$("#influencer-profile-input").val(influencerProfile.profile)
+	$("#influencer-price-input").val(influencerProfile.price)
+	var loaderCounter = 0;
+	function showAfterTwo(){
+		loaderCounter++;
+		if(loaderCounter==2){
+			$("#edit-profile-modal").modal('show');
+		}
+	}
+	$("#edit-avatar-img").attr('src',influencerProfile.avatar).on('load', showAfterTwo);
+	$("#edit-banner-img").attr('src',influencerProfile.banner).on('load', showAfterTwo);
 }
 
 window.showProfile = async function showProfile(influencerId,influencerProfile) {
@@ -374,7 +330,6 @@ window.showProfile = async function showProfile(influencerId,influencerProfile) 
 			} 
 		});
 	}
-	// $("#find-influencers").hide();
 	$("#my-subs-banner").hide();
 	
 	$(".influencer-name").html(influencerProfile.name);
@@ -389,8 +344,6 @@ window.showProfile = async function showProfile(influencerId,influencerProfile) 
 
 	$("#influencer-content").hide();
 	$('#loading-influencer-content').hide();
-	// $('#loading-influencer-content').show();
-	// $('#loading-influencer-content').html("Loading content... "+spinner);
 
 	var loaderCounter = 0;
 	function showAfterTwo(){
@@ -399,15 +352,20 @@ window.showProfile = async function showProfile(influencerId,influencerProfile) 
 			$("#influencer-profile").show();
 			if (!influencerProfile.hasAccess) {
 				$(".subscribe-btn").show();
-				// $("#influencer-content").hide();
 			} else {
+				
 				var content = influencerProfile.content;
-				// var content = await getContentOf(influencerId);
 				if (!content.length){
 					$('#loading-influencer-content').show()
 					$('#loading-influencer-content').html(`${influencerProfile.name} doesn't have any content yet!`)
 				} else {
 					showContentInGrid(addOwner(content,influencerId,influencerProfile.name),true);
+				}
+				if (influencerId == accountId){
+					// it's my profile
+					var addNewContent = $(".add-content-template").clone();
+					addNewContent.addClass("single-content");
+					$contentGrid.prepend(addNewContent).masonry( 'prepended', addNewContent );
 				}
 			}
 		}
@@ -415,9 +373,6 @@ window.showProfile = async function showProfile(influencerId,influencerProfile) 
 	$("#influencer-avatar").attr('src',influencerProfile.avatar).on('load', showAfterTwo);
 	$("#influencer-banner").attr('src',influencerProfile.banner).on('load', showAfterTwo);
 
-	
-	// var hasAcces = await hasAccessTo(influencerId);
-	
 }
 
 function addOwner(content, id,name){
@@ -430,7 +385,7 @@ function showContentInGrid(content,inProfile) {
 	$(".single-content").remove();
 	$("#influencer-content").show();
 	content.forEach(c=>showSingleContent(c,inProfile));
-    
+    $contentGrid.masonry();
 }
 
 function checkSiaLinkType(sialink){
@@ -453,13 +408,20 @@ function showSingleContent(content,inProfile) {
 		if (contentType.includes('image')){
 			newContent.find('video').remove();	
 			newContent.find('img').attr('src',content.sialink).on('load', function () {
-				$contentGrid.masonry();
+				// if (this.width > this.height){
+					// newContent.addClass("grid-item--width2")
+					$contentGrid.masonry();
+				// }
+				
 			});
 		} else {
 			newContent.find('img').remove();
-			newContent.find('video').attr('src',content.sialink)
 			newContent.find('video').attr('type',contentType);
-			$contentGrid.masonry();
+			newContent.find('video').attr('src',content.sialink).on('loadeddata', function () {
+				$contentGrid.masonry();
+			})
+			
+			
 		}
 	})
 	
