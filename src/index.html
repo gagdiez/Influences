@@ -77,14 +77,14 @@
 		</nav>
 	    
     <div class="container content-container">
-            <section id="my-subs-banner" style="text-align:center; margin:60px auto 30px auto;">
+            <section id="my-subs-banner" style="text-align:center; margin:50px auto 35px auto;">
                 <h1 class="display-4 text-black">Welcome back!</h1>
                 <p class="lead loading-subs">Finding your subscription content... <i class="fas fa-sync fa-spin"></i></p>
                 <p class="lead has-subs">This is what your favourite influencers have been up to.</p>
                 <p class="lead has-no-subs">You're not following anyone yet. Find some influencers and become a fan!</p>
             </section>
 
-            <section class="pt-0 pb-5 header text-center" id="influencer-profile" style="display: none">
+            <section class="pt-0 pb-4 header text-center" id="influencer-profile" style="display: none">
                 <div class="banner" >
                   <img src="assets/bannerplaceholder.png" id="influencer-banner" class="img-fluid">
                 </div>
@@ -101,15 +101,15 @@
             <div id="templates" class="d-none">
 
                 <div class="col-lg-4 col-md-6 grid-item mb-3 content-template">
-                  <div class="grid-content w-100 mb-2 img-thumbnail rounded-2">
+                  <div class="w-100 mb-2 img-thumbnail rounded-2">
                     <a href="#" class="main-content mb-2" data-toggle="lightbox" data-type="image">
                         <img src="#" class="img-fluid">
                         <video class="img-fluid" controls="controls"/>
                     </a>
                     <div class="content-info mb-2">
-                        <h2 class="h2 text-muted font-italic">Content Title</h2>
-                        <p class="small text-muted font-italic">Uploaded on</p>
-                        <button class="btn btn-outline-secondary visit-influencer-btn mb-2">Visit Influencer</button>
+                        <p id="ctitle" class="small text-muted font-italic">Content Title</h2>
+                        
+                        <p class="tcontent small text-muted font-italic">Uploaded on</p>
                         <button class="btn btn-outline-secondary remove-content-btn">Remove</button>
                     </div>
                   </div>
@@ -130,7 +130,7 @@
 
             <section class="pb-6" id="influencer-content">
                 <div class=" text-center">
-                    <div class="alert alert-dark mt-4" role="alert" style="display: none" id="loading-influencer-content"></div>
+                    <div class="alert alert-dark" role="alert" style="display: none" id="loading-influencer-content"></div>
                     <!-- Masonry grid -->
                     <div class="gallery-wrapper content-gallery">
                         <!-- Grid sizer -->

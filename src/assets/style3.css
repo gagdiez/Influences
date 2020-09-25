@@ -8,6 +8,7 @@
     min-height: 100vh;
     height: 100%;
 }
+
 .banner{
   overflow:hidden;
   background-color:"#cccccc";
@@ -27,6 +28,9 @@ nav .btn{
   max-width:70%;
 }
 
+.tcontent{
+  margin: -8px 0;
+}
 
 .grid-item--width2 { max-width: 50%; }
 
@@ -74,6 +78,7 @@ nav .btn{
 body {
     font-family: 'Poppins', sans-serif;
     background: #fafafa;
+    background-image:url('./bkg2.png');
 }
 
 p {
@@ -97,7 +102,7 @@ a:focus {
     background: #fff;
     border: none;
     border-radius: 0;
-    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 1px 6px 10px rgba(0, 0, 0, 0.1);
 }
 
 .navbar-btn {

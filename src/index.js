@@ -443,12 +443,12 @@ function showSingleContent(content,inProfile) {
 	})
 	
 	
-	newContent.find('h2').html(content.description);
+	newContent.find('#ctitle').html(content.description);
 	let date = new Date(content.creationDate/1000000)
-	newContent.find('.small').html("Uploaded on "+date.toDateString());
 	if (!inProfile){
-		newContent.find('.visit-influencer-btn').attr('target',content.ownerId);
-		newContent.find('.visit-influencer-btn').html("Visit "+content.ownerName);
+        let small = newContent.find('.tcontent');
+		small.attr('target',content.ownerId);
+		small.html("Uploaded on " + date.toDateString() + " by "+content.ownerName);
 		newContent.find('.remove-content-btn').remove();
 		newContent.find('.visit-influencer-btn').click(async function(){
 			var target = $(this).attr('target');
@@ -456,6 +456,7 @@ function showSingleContent(content,inProfile) {
 			showProfile(target,influencerProfile);
 		});
 	} else {
+        newContent.find('.small').html("Uploaded on "+date.toDateString());
 		newContent.find('.visit-influencer-btn').remove();
 		if (content.ownerId != accountId){
 			newContent.find('.remove-content-btn').remove();
