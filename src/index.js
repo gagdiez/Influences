@@ -83,21 +83,22 @@ $(document).ready(function () {
 		var name = $("#influencer-name-input").val();
 		var description = $("#influencer-profile-input").val();
 		var price = $("#influencer-price-input").val();
-		var avatar = accountProfile.avatar;
-		var banner = accountProfile.banner;
+		var avatar = accountProfile ? accountProfile.avatar : $('#edit-avatar-img').attr('src');
+		var banner = accountProfile ? accountProfile.banner : $('#edit-banner-img').attr('src');
 
 		async function updateProfile(){
 			await updateMyProfile(name, banner, avatar, description, price)
 			accountProfile = await getProfileOf(accountId);
 			$("#edit-profile-modal").modal('hide');
 			$("#edit-profile-save").html("Save changes");
+			if ($('#become-influencer-btn').is(":visible")){
+				$("#become-influencer-btn").hide();
+	    		$(".influencer-btn").show();
+			}
 			showProfile();
 		}
 		
-		if ($('#become-influencer-btn').is(":visible")){
-			$("#become-influencer-btn").hide();
-    		$(".influencer-btn").show();
-		}
+		
 		
 		var avatarFiles = $("#upload-avatar-input").prop('files');
 		var bannerFiles = $("#upload-banner-input").prop('files');
