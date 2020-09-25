@@ -5,7 +5,7 @@ import 'regenerator-runtime/runtime'
 import { initNEAR, login, logout,
 		getProfileOf, getMyInfluencers,
          subscribeTo, upload_file_to_sia, updateMyProfile,
-         addToMyContent,deleteFromMyContent } from './blockchain'
+         addToMyContent,deleteFromMyContent, generateUUID } from './blockchain'
 
 window.login = login;
 
@@ -14,8 +14,8 @@ window.logout = logout;
 // Harcoded influencer for now
 const spinner = '<i class="fas fa-sync fa-spin"></i>'; 
 window.$contentGrid = null;
-let $influencerGrid, $searchGrid;
-let avatarPlaceholder, bannerPlaceholder;
+window.currentSection = "subscriptionContent"
+let avatarPlaceholder, bannerPlaceholder, subs = null;
 
 $(document).ready(function () {
 
@@ -80,6 +80,7 @@ $(document).ready(function () {
 
 
 	$("#edit-profile-save").click(function(){
+		$("#edit-profile-save").html("Saving... "+spinner);
 		var name = $("#influencer-name-input").val();
 		var description = $("#influencer-profile-input").val();
 		var price = $("#influencer-price-input").val();
@@ -116,7 +117,7 @@ $(document).ready(function () {
 			return updateProfile();
 		}
 		Promise.all(uploads.files).then(async links => {
-			$("#edit-profile-save").html("Saving... "+spinner);
+			
 			if (uploads.keys.avatar){
 				avatar = 'https://siasky.net/'+links[0];
 				if (uploads.keys.banner){
@@ -179,9 +180,7 @@ async function loginFlow() {
 	$("#logged-out").hide();
     $("#logged-in").show();
     $(".logged-user-name").html(accountId);
-    console.log("Getting profile")
 	getProfileOf(accountId).then(profile=>{
-		console.log(profile)
 		window.accountProfile = profile;
 		if (accountProfile) {
 	    	$(".influencer-btn").show();
@@ -189,7 +188,6 @@ async function loginFlow() {
 	    	$("#become-influencer-btn").show();
 	    }
 	})
-	console.log("Subscription content")
 	showSubscriptionContent();
 }
 
@@ -206,7 +204,6 @@ function logoutFlow(){
 function uploadFilePreview(uploader,callback){
 	// upload file in frontend and show preview
 	if (uploader.files && uploader.files[0]) {
-		console.log(uploader.files[0]);
 		if (uploader.files[0].type.includes('video')){
 			var fileUrl = URL.createObjectURL(uploader.files[0]);
    			
@@ -258,13 +255,19 @@ window.subscribeToInfluencer = async function(){
 // ------------------------------------------------------
 
 window.showSubscriptionContent = async function showSubscriptionContent() {
+	var nextSection = generateUUID();
+	currentSection = nextSection.toString();
+	$("#loading-influencer-content").hide();
 	$("#influencer-profile").hide();
 	$("#influencer-content").hide();
 	$("#my-subs-banner").show();
 
 	$("#my-subs-banner").find(".lead").hide();
 	$("#my-subs-banner").find(".loading-subs").show();
-	var subs = await getMyInfluencers();
+	if (!subs){
+		subs = await getMyInfluencers();
+	}
+	
 	if (!subs.length){
 		$("#my-subs-banner").find(".loading-subs").hide();
 		$("#my-subs-banner").find(".has-no-subs").show();
@@ -274,13 +277,12 @@ window.showSubscriptionContent = async function showSubscriptionContent() {
 	$("#my-subs-banner").show();
 	let content = [];
 	subs.forEach(profile=>{
-		console.log(profile);
 		content = content.concat(addOwner(profile.content,profile.id,profile.name))
 	});
 
 	$("#my-subs-banner").find(".loading-subs").hide();
 	$("#my-subs-banner").find(".has-subs").show();
-	showContentInGrid(content,false);
+	showContentInGrid(content,false,nextSection.toString());
 }
 
 function profileChanged(p1,p2){
@@ -320,6 +322,8 @@ window.editProfile = async function editProfile(){
 }
 
 window.showProfile = async function showProfile(influencerId,influencerProfile) {
+	var nextSection = generateUUID();
+	currentSection = nextSection.toString();
 	if (!influencerId){
 		influencerId = accountId;
 		influencerProfile = accountProfile;
@@ -343,7 +347,8 @@ window.showProfile = async function showProfile(influencerId,influencerProfile) 
 	$(".subscribe-btn").html(`Subscribe for ${influencerProfile.price}(N) per month to see all the content!`);
 	$(".subscribe-btn").hide();
 
-	$("#influencer-content").hide();
+	$(".single-content").remove();
+	$("#influencer-content").show();
 	$('#loading-influencer-content').hide();
 
 	var loaderCounter = 0;
@@ -354,13 +359,12 @@ window.showProfile = async function showProfile(influencerId,influencerProfile) 
 			if (!influencerProfile.hasAccess) {
 				$(".subscribe-btn").show();
 			} else {
-				
 				var content = influencerProfile.content;
 				if (!content.length){
 					$('#loading-influencer-content').show()
 					$('#loading-influencer-content').html(`${influencerProfile.name} doesn't have any content yet!`)
 				} else {
-					showContentInGrid(addOwner(content,influencerId,influencerProfile.name),true);
+					showContentInGrid(addOwner(content,influencerId,influencerProfile.name),true,nextSection);
 				}
 				if (influencerId == accountId){
 					// it's my profile
@@ -381,12 +385,15 @@ function addOwner(content, id,name){
 	return content.map(c=>{return {ownerId:id,ownerName:name,...c} })
 }
 
-function showContentInGrid(content,inProfile) {
-	content.sort((c1,c2)=>c1.creationDate<c2.creationDate);
-	$(".single-content").remove();
-	$("#influencer-content").show();
-	content.forEach(c=>showSingleContent(c,inProfile));
-    $contentGrid.masonry();
+function showContentInGrid(content,inProfile,section) {
+	if (section === currentSection){
+		content.sort((c1,c2)=>c1.creationDate<c2.creationDate);
+		$(".single-content").remove();
+		$("#influencer-content").show();
+		content.forEach(c=>showSingleContent(c,inProfile));
+	    $contentGrid.masonry();
+	}
+	
 }
 
 function checkSiaLinkType(sialink){
@@ -411,15 +418,18 @@ function showSingleContent(content,inProfile) {
 			newContent.find('img').attr('src',content.sialink).on('load', function () {
 				// if (this.width > this.height){
 					// newContent.addClass("grid-item--width2")
-					$contentGrid.masonry();
+					
 				// }
-				
+				newContent.removeClass("d-none");
+				$contentGrid.masonry();
 			});
 		} else {
 			newContent.find('img').remove();
 			newContent.find('video').attr('type',contentType);
 			newContent.find('video').attr('src',content.sialink).on('loadeddata', function () {
+				newContent.removeClass("d-none");
 				$contentGrid.masonry();
+	
 			})
 			
 			
@@ -455,7 +465,6 @@ function showSingleContent(content,inProfile) {
 	}
 	newContent.addClass("single-content");
 	newContent.removeClass("content-template");
-	newContent.removeClass("d-none");
-	$contentGrid.append(newContent).masonry( 'appended', newContent );
-
+	
+	$contentGrid.append(newContent).masonry( 'appended', newContent ).masonry();;
 }

@@ -71,7 +71,7 @@ export async function deleteFromMyContent(sialink){
 // PROFILE
 export async function updateMyProfile(name, banner, avatar, description, price){
   // Returns true if everything goes right
-  price = utils.format.parseNearAmount(price)
+  price = utils.format.parseNearAmount(price? price : "0");
   return await contract.updateMyProfile({name, banner, avatar,
                                          description, price})
 }
@@ -91,7 +91,7 @@ export async function getMyInfluencers(){
 }
 
 // SIA
-function generateUUID() {
+export function generateUUID() {
   let uuid = ''
   const cs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
   for (let i = 0; i < 16; i++) {
