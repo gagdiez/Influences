@@ -297,6 +297,10 @@ function profileChanged(p1,p2){
 
 
 window.editProfile = async function editProfile(){
+	$("#loading-profile-content").show()
+	$("#edit-profile-content").hide();
+	$("#edit-profile-save").hide();
+	$("#edit-profile-modal").modal('show');
 	let influencerProfile = await getProfileOf(accountId);
 	if (!influencerProfile){
 		influencerProfile = {
@@ -314,7 +318,9 @@ window.editProfile = async function editProfile(){
 	function showAfterTwo(){
 		loaderCounter++;
 		if(loaderCounter==2){
-			$("#edit-profile-modal").modal('show');
+			$("#loading-profile-content").hide()
+			$("#edit-profile-content").show();
+			$("#edit-profile-save").show();
 		}
 	}
 	$("#edit-avatar-img").attr('src',influencerProfile.avatar).on('load', showAfterTwo);

@@ -150,43 +150,49 @@
                         </button>
                       </div>
                       <div class="modal-body">
-                        <button type="button" id="edit-banner-btn" class="btn  btn-icon btn-secondary" style="position: absolute; margin: 10px" onclick="document.getElementById('upload-banner-input').click();">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        
-                        <img src="assets/bannerplaceholder.png" id="edit-banner-img" class="img-fluid">
-
-                        <div class="avatar text-center">
-                            <img alt="" src="assets/avatarplaceholder.png" id="edit-avatar-img">
-                            <button type="button" id="edit-avatar-btn" class="btn btn-icon btn-secondary" onclick="document.getElementById('upload-avatar-input').click();">
-                                <i class="fas fa-edit"></i>
-                            </button>
-
+                        <div id="loading-profile-content" class="text-center">
+                          <i class="fas fa-sync fa-spin"></i>
                         </div>
-                        <input id="upload-avatar-input" type="file" accept="image/*" name="upload-avatar" style="display: none;" />
-                        <input id="upload-banner-input" type="file" accept="image/*" name="upload-banner" style="display: none;" />
-                        <form>
-                          <div class="form-group">
-                            <label for="influencer-name-input">Influencer name</label>
-                            <input type="text" class="form-control" id="influencer-name-input" aria-describedby="nameHelp" placeholder="Enter your influencer name">
-                            <small id="nameHelp" class="form-text text-muted">Choose a name to display in your profile page.</small>
-                          </div>
-                          <div class="form-group">
-                            <label for="influencer-profile-input">Profile</label>
-                            <input type="text" class="form-control" id="influencer-profile-input" aria-describedby="profileHelp" placeholder="About myself...">
-                            <small id="profileHelp" class="form-text text-muted">Tell your fans something about yourself.</small>
-                          </div>
-                          <div class="form-group">
-                            <label for="influencer-price-input">Your fees</label>
-                            <input type="number" class="form-control" id="influencer-price-input" aria-describedby="priceHelp" value="30">
-                            <small id="priceHelp" class="form-text text-muted">How much will you charge your fans monthly.</small>
-                          </div>
+                        <div id="edit-profile-content">
+                          <button type="button" id="edit-banner-btn" class="btn  btn-icon btn-secondary" style="position: absolute; margin: 10px" onclick="document.getElementById('upload-banner-input').click();">
+                            <i class="fas fa-edit"></i>
+                          </button>
                           
-                        </form>
+                          <img src="assets/bannerplaceholder.png" id="edit-banner-img" class="img-fluid">
+
+                          <div class="avatar text-center">
+                              <img alt="" src="assets/avatarplaceholder.png" id="edit-avatar-img">
+                              <button type="button" id="edit-avatar-btn" class="btn btn-icon btn-secondary" onclick="document.getElementById('upload-avatar-input').click();">
+                                  <i class="fas fa-edit"></i>
+                              </button>
+
+                          </div>
+                          <input id="upload-avatar-input" type="file" accept="image/*" name="upload-avatar" style="display: none;" />
+                          <input id="upload-banner-input" type="file" accept="image/*" name="upload-banner" style="display: none;" />
+                          <form>
+                            <div class="form-group">
+                              <label for="influencer-name-input">Influencer name</label>
+                              <input type="text" class="form-control" id="influencer-name-input" aria-describedby="nameHelp" placeholder="Enter your influencer name">
+                              <small id="nameHelp" class="form-text text-muted">Choose a name to display in your profile page.</small>
+                            </div>
+                            <div class="form-group">
+                              <label for="influencer-profile-input">Profile</label>
+                              <input type="text" class="form-control" id="influencer-profile-input" aria-describedby="profileHelp" placeholder="About myself...">
+                              <small id="profileHelp" class="form-text text-muted">Tell your fans something about yourself.</small>
+                            </div>
+                            <div class="form-group">
+                              <label for="influencer-price-input">Your fees</label>
+                              <input type="number" class="form-control" id="influencer-price-input" aria-describedby="priceHelp" value="30">
+                              <small id="priceHelp" class="form-text text-muted">How much will you charge your fans monthly.</small>
+                            </div>
+                            
+                          </form>
+                        </div>
+                        
                       </div>
                       <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-light" id='edit-profile-save'>Save changes</button>
+                        <button type="button" class="btn btn-light" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-secondary" id='edit-profile-save'>Save changes</button>
                       </div>
                     </div>
                   </div>
@@ -217,8 +223,8 @@
                           </div>
                       </div>
                       <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-light" id='add-content-btn'>Add content</button>
+                        <button type="button" class="btn btn-light" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-secondary" id='add-content-btn'>Add content</button>
                       </div>
                     </div>
                   </div>
