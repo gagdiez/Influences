@@ -177,9 +177,9 @@ $(document).ready(function () {
 // ------------------------------------------------------
 
 async function loginFlow() {
-	$("#logged-out").hide();
-    $("#logged-in").show();
-    $(".logged-user-name").html(accountId);
+	$("#starting").hide();
+  $("#logged-in").show();
+  $(".logged-user-name").html(accountId);
 	getProfileOf(accountId).then(profile=>{
 		window.accountProfile = profile;
 		if (accountProfile) {
@@ -192,8 +192,8 @@ async function loginFlow() {
 }
 
 function logoutFlow(){
-	$("#logged-in").hide();
-    $("#logged-out").show();
+	$("#starting").hide();
+  $("#logged-out").show();
 }
 
 // ------------------------------------------------------
@@ -446,7 +446,7 @@ function showSingleContent(content,inProfile) {
 	newContent.find('#ctitle').html(content.description);
 	let date = new Date(content.creationDate/1000000)
 	if (!inProfile){
-        let small = newContent.find('.tcontent');
+    let small = newContent.find('.tcontent');
 		small.attr('target',content.ownerId);
 		small.html("Uploaded on " + date.toDateString() + " by "+content.ownerName);
 		newContent.find('.remove-content-btn').remove();
@@ -456,7 +456,7 @@ function showSingleContent(content,inProfile) {
 			showProfile(target,influencerProfile);
 		});
 	} else {
-        newContent.find('.small').html("Uploaded on "+date.toDateString());
+    newContent.find('.small').html("Uploaded on "+date.toDateString());
 		newContent.find('.visit-influencer-btn').remove();
 		if (content.ownerId != accountId){
 			newContent.find('.remove-content-btn').remove();
