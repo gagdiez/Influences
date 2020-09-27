@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Influences &mdash; Discover, influence, pay your dues. </title>
+  <title>Influences &mdash; Create content. Share it. Earn Money. </title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Influences is a social network on the blockchain." />
   <meta name="keywords" content="blockchain, social network, siacoin, near, influencer" />
@@ -30,29 +30,34 @@
       <p class="font-italic text-muted mb-4">Loading <i class="fas fa-sync fa-spin"></i> </p>
    </div>
   </section>
+
   </section>
-  <section id='logged-out' class="w-100 h-100" style="display:none">
-    <div class="row" style="margin-right:0;">
-      <div class="col-sm">
-        <img src="assets/landing.jpg" class="landing-img">
-      </div>
-
-      <div class="col-sm">
-        <div class="h-v-centered text-center">
-          <img src="assets/logo.png"/>
-          <h1 class="display-4">Influences</h1>
-          <p class="font-italic text-muted mb-4">Create content. Share it. Earn Money.</p>
-          <button type="button" class="btn btn-primary btn-lg mt-4"
-                  id="login-btn" onclick="login()">
-            Login with NEAR
-          </button>
+  <section id='logged-out' style="display:none">
+    <div class="container">
+      <div class="row" style="height:100vh">
+        <div class="col-lg">
+          <img src="assets/landing.jpg" class="landing-img h-v-centered">
         </div>
-
-        <div class="footer">
-          Powered by the blockchain technologies of
-          <a style="color:#4e9a06" href="https://siasky.net/"> SIA </a>
-          and <a style="color:#41788d" href="https://near.org/">NEAR</a> -
-          <a href="#"> How does Influences work?.</a>
+        <div class="col-lg-4">
+          <div class="h-v-centered text-center">
+            <img style="max-width:calc(min(30vh, 30vw));"
+                 src="assets/logo.png"/>
+            <h1 class="display-4">Influences</h1>
+            <p class="font-italic text-muted mb-4">
+              Create content. Share it. Earn Money.
+            </p>
+            <button type="button" class="btn btn-primary btn-lg mt-4"
+                    id="login-btn" onclick="login()">
+              Login with NEAR
+            </button>
+            
+            <div class="footer small">
+              Powered by 
+              <a style="color:#4e9a06" href="https://siasky.net/"> SIA </a>
+              and <a style="color:#41788d" href="https://near.org/">NEAR</a>.
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
