@@ -92,10 +92,8 @@ $(document).ready(function () {
 			accountProfile = await getProfileOf(accountId);
 			$("#edit-profile-modal").modal('hide');
 			$("#edit-profile-save").html("Save changes");
-			if ($('#become-influencer-btn').is(":visible")){
-				$("#become-influencer-btn").hide();
-	    		$(".influencer-btn").show();
-			}
+			$("#become-influencer-btn").hide();
+    		$(".influencer-btn").show();
 			showProfile();
 		}
 		
@@ -305,14 +303,14 @@ window.editProfile = async function editProfile(){
 	if (!influencerProfile){
 		influencerProfile = {
 			name: "",
-			profile: "",
+			description: "",
 			price: 30,
 			avatar: avatarPlaceholder,
 			banner: bannerPlaceholder
 		}
 	} 
 	$("#influencer-name-input").val(influencerProfile.name)
-	$("#influencer-profile-input").val(influencerProfile.profile)
+	$("#influencer-profile-input").val(influencerProfile.description)
 	$("#influencer-price-input").val(influencerProfile.price)
 	var loaderCounter = 0;
 	function showAfterTwo(){
