@@ -1,6 +1,7 @@
-import {context, env, u128,  ContractPromiseBatch} from "near-sdk-as";
-import {subscribed, influencers_content, influencers_profile, influencers_of_fan,
-        influencer_nbr_fans, Profile, ContentList, Content, InfluencerList} from "./model"
+import {context, env, u128, ContractPromiseBatch, logging} from "near-sdk-as";
+import {subscribed, influencers_content, influencers_profile,
+        influencers_of_fan, influencer_nbr_fans, Profile, ContentList,
+        Content, InfluencerList, promoted_vector} from "./model"
 
 function hasAccessTo(influencer:string): bool{
   if (context.sender == influencer){return true}
@@ -144,4 +145,33 @@ function addFan_addInfluencer(influencer:string):void{
   // Add me as fan of influencer
   let fans = influencer_nbr_fans.getSome(influencer)
   influencer_nbr_fans.set(influencer, fans+1)
+}
+
+
+// PROMOTED HANDLING
+
+export function getPromoted():Array<Profile>{
+  let promoted:Array<Profile> = new Array<Profile>()
+
+  for (let i=0; i < promoted_vector.length; i++){
+    promoted.push(promoted_vector[i])
+  }
+
+  return promoted
+}
+
+export function promoteMe():void{
+  let price:u128 = u128.from('10000000000000000000000000')
+
+  if (context.attachedDeposit >= price){
+    let profile = getProfileOf(context.sender)
+    if (!profile){
+      ContractPromiseBatch.create(context.sender).transfer(context.attachedDeposit)
+      return
+    }
+    promoted_vector.push(profile)
+    logging.log("Promoted")
+  }else{
+    ContractPromiseBatch.create(context.sender).transfer(context.attachedDeposit)
+  }
 }

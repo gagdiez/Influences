@@ -1,7 +1,7 @@
-import { PersistentMap, u128 } from "near-sdk-as";
+import { PersistentVector, PersistentMap, u128 } from "near-sdk-as";
 
 // MAP "fan,influencer" -> timestamp, so we can cut them after one month
-export const subscribed = new PersistentMap<string, u64>("S")
+export const subscribed = new PersistentMap<string, u64>("Sub")
 
 // MAP influencer -> [{link, upload_time, description}]
 @nearBindgen
@@ -15,7 +15,7 @@ export class ContentList {
   constructor(public content: Array<Content>) {}
 }
 
-export const influencers_content = new PersistentMap<string, ContentList>("C")
+export const influencers_content = new PersistentMap<string, ContentList>("Con")
 
 // MAP: influencer -> Profile
 @nearBindgen
@@ -26,7 +26,7 @@ export class Profile {
               public fans:u16=0, public hasAccess:bool=false){}
 }
 
-export const influencers_profile = new PersistentMap<string, Profile>("P")
+export const influencers_profile = new PersistentMap<string, Profile>("Pro")
 
 // MAP: influencer
 
@@ -34,6 +34,9 @@ export const influencers_profile = new PersistentMap<string, Profile>("P")
 export class InfluencerList {
   constructor(public influencers: Array<string>) {}
 }
-export const influencers_of_fan = new PersistentMap<string, InfluencerList>("I")
+export const influencers_of_fan = new PersistentMap<string, InfluencerList>("Inf")
 
-export const influencer_nbr_fans = new PersistentMap<string, u16>('F')
+export const influencer_nbr_fans = new PersistentMap<string, u16>('Fan')
+
+// MAP: promoted influencers
+export let promoted_vector = new PersistentVector<Profile>("Pr")

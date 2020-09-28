@@ -32,11 +32,24 @@ export async function initNEAR() {
   window.contract = new Contract(
     window.walletConnection.account(),
     nearConfig.contractName,
-    {viewMethods: [],
+    {viewMethods: ['getPromoted'],
      changeMethods: ['subscribeTo', 'getMyInfluencers', 'addToMyContent',
-                     'deleteFromMyContent', 'updateMyProfile', 'getProfileOf']}
+                     'deleteFromMyContent', 'updateMyProfile', 'getProfileOf',
+                     'promoteMe']}
   )
   return walletConnection.isSignedIn()
+}
+
+export async function getPromoted(){
+  // Returns array of Profiles
+  return await contract.getPromoted()
+}
+
+export async function promoteMe(money_amount){
+  let amount = utils.format.parseNearAmount(money_amount.toString())
+  console.log(amount)
+  let account = window.walletConnection.account()
+  account.functionCall(nearConfig.contractName, 'promoteMe', {}, 0, amount)
 }
 
 // CONTENT

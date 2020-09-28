@@ -109,6 +109,24 @@
       </div>
     </nav>
 
+    <section class="container featured-container" id="featured-influencers">
+      <div id="carouselIndicators" class="carousel slide"
+           data-interval="8000" data-ride="carousel">
+        <div class="carousel-inner" id="featured-influencers-carousel">
+        </div>
+        <a class="carousel-control-prev" href="#carouselIndicators"
+           role="button" data-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="sr-only">Previous</span>
+        </a>
+        <a class="carousel-control-next" href="#carouselIndicators"
+            role="button" data-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="sr-only">Next</span>
+        </a>
+      </div>
+    </section>
+
     <div class="container content-container">
       <section id="my-subs-banner" style="text-align:center; margin:50px auto 35px auto;">
         <h1 class="display-5 text-black">Welcome back!</h1>
@@ -159,17 +177,17 @@
         </div>
 
         <div class="carousel-item featured-influencer-template">
-          <img class="d-block w-100" src="/assets/bannerplaceholder.png">
           <div class="banner" >
-            <img src="assets/bannerplaceholder.png" id="featured-banner" class="img-fluid">
+            <img src="assets/bannerplaceholder.png" id="featured-banner"
+                 class="img-fluid">
           </div>
-          <div class="avatar">
+          <div class="featured-avatar">
             <img alt="" id="featured-avatar" src="assets/avatarplaceholder.png">
           </div>
-          <div class="carousel-caption d-none d-md-block">
-            <h5><a>INFLUENCER NAME</a></h5>
-            <p>INFLUENCER PROFILE</p>
+          <div class="carousel-caption d-none small d-md-block">
+            <a>INFLUENCER NAME</a>
           </div>
+          <div class="small promo-text">PROMOTED</div>
         </div>
       </div>
 
@@ -184,24 +202,6 @@
         </div>
       </section>
 
-      <section class="pb-6" id="featured-influencers">
-        <div style="text-align:center; margin:50px auto 35px auto;">
-          <h1 class="display-5 text-black">Featured Influencers </h1>
-          <p class="lead">Need someone new to follow? Here are some of our suggestions</p>
-        </div>
-        <div id="carouselIndicators" class="carousel slide" data-ride="carousel">
-          <div class="carousel-inner" id="featured-influencers-carousel">
-          </div>
-          <a class="carousel-control-prev" href="#carouselIndicators" role="button" data-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="sr-only">Previous</span>
-          </a>
-          <a class="carousel-control-next" href="#carouselIndicators" role="button" data-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="sr-only">Next</span>
-          </a>
-        </div>
-      </section>
 
       <div id="modals">
         <div class="modal fade" id="edit-profile-modal" tabindex="-1" role="dialog">
@@ -272,13 +272,13 @@
                 </button>
               </div>
               <div class="modal-body">
-                <p>Promoting your Influence is the best way to gain new fans. One easy way to do this is by becoming a featured influencer for only <span id="promotion-price">5<span> Nears.</p>
-                <p>If you decide to suscribe to this promotion, you will appear recommended in the main page of all users for a whole month.</p>
-                <p>Become a featured influencer and reach more people.</p>
+                <p>Promote your profile for only <span id="promotion-price">5</span>N!
+                   We will show you in the main page of all users for a whole month.</p>
+                <p>Become a featured influencer and reach more people now!.</p>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-light" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-secondary" onclick="becomeFeatured()">Add content</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="promoteUser()">Become Featured</button>
               </div>
             </div>
           </div>

@@ -2,18 +2,18 @@
 import 'regenerator-runtime/runtime'
 
 
-import { initNEAR, login, logout,
+import {initNEAR, login, logout,
 		getProfileOf, getMyInfluencers,
-         subscribeTo, upload_file_to_sia, updateMyProfile,
-         addToMyContent,deleteFromMyContent, generateUUID } from './blockchain'
+        subscribeTo, upload_file_to_sia, updateMyProfile,
+        addToMyContent,deleteFromMyContent, generateUUID,
+        promoteMe, getPromoted} from './blockchain'
 
 window.login = login;
-
 window.logout = logout;
 
 // Harcoded influencer for now
 const spinner = '<i class="fas fa-sync fa-spin"></i>'; 
-const promotionPrice = 5;
+const promotionPrice = 10;
 window.$contentGrid = null;
 window.currentSection = "subscriptionContent"
 let avatarPlaceholder, bannerPlaceholder, subs = null;
@@ -245,14 +245,14 @@ function showFeaturedInfluencers(){
 		template.find("#featured-banner").attr("src",influencer.banner)
 		template.find("#featured-avatar").attr("src",influencer.avatar)
 		template.find("a").html(influencer.name)
-		
-		template.find("p").html(influencer.description)
+
 		template.find("a").click(()=>{
 			showFeaturedInfluencer(influencer.id);
 		})
 		$("#featured-influencers-carousel").append(template)
 	})
 	
+    $(".carousel-item")[0].classList.add("active");
 }
 
 window.showFeaturedInfluencer = function(influencerId){
@@ -292,10 +292,10 @@ window.showSubscriptionContent = async function showSubscriptionContent() {
 	if (!subs){
 		subs = await getMyInfluencers();
 		// TODO 
-		// getFeaturedInfluencers().then((featuredInfluencers)=>{
-		// 	window.featuredInfluencers = featuredInfluencers;
-		// 	showFeaturedInfluencers();
-		// })
+		getPromoted().then((featuredInfluencers)=>{
+			window.featuredInfluencers = featuredInfluencers;
+			showFeaturedInfluencers();
+		})
 	}
 	$("#featured-influencers").show();
 	if (!subs.length){
@@ -413,8 +413,9 @@ window.showProfile = async function showProfile(influencerId,influencerProfile) 
 	}
 	$("#influencer-avatar").attr('src',influencerProfile.avatar).on('load', showAfterTwo);
 	$("#influencer-banner").attr('src',influencerProfile.banner).on('load', showAfterTwo);
-
 }
+
+window.promoteUser = function promoteUser(){promoteMe(promotionPrice);}
 
 function addOwner(content, id,name){
 	if (!name) name = id;
