@@ -13,6 +13,7 @@ window.logout = logout;
 
 // Harcoded influencer for now
 const spinner = '<i class="fas fa-sync fa-spin"></i>'; 
+const promotionPrice = 5;
 window.$contentGrid = null;
 window.currentSection = "subscriptionContent"
 let avatarPlaceholder, bannerPlaceholder, subs = null;
@@ -30,6 +31,8 @@ $(document).ready(function () {
 		    $('.btn-upload').hide();
     	});
 	});
+
+	$("#promotion-price").html(promotionPrice);
 
 	avatarPlaceholder = $('#influencer-avatar').attr('src');
 	bannerPlaceholder = $('#influencer-banner').attr('src');
@@ -234,10 +237,33 @@ window.searchInfluencers = async function(){
 	} 
 }
 
+function showFeaturedInfluencers(){
+	featuredInfluencers.forEach(influencer => {
+		var template = $(".featured-influencer-template").clone();
+		template.removeClass("featured-influencer-template");
+		template.addClass("featured-influencer");
+		template.find("#featured-banner").attr("src",influencer.banner)
+		template.find("#featured-avatar").attr("src",influencer.avatar)
+		template.find("a").html(influencer.name)
+		
+		template.find("p").html(influencer.description)
+		template.find("a").click(()=>{
+			showFeaturedInfluencer(influencer.id);
+		})
+		$("#featured-influencers-carousel").append(template)
+	})
+	
+}
 
-window.seeFeaturedInfluencers = function(){
-	$("#search-results").hide();
-	$("#featured-influencers").show();
+window.showFeaturedInfluencer = function(influencerId){
+	let profile = featuredInfluencers.find(featured=> featured.id == influencerId)
+	if (profile) {
+		showProfile(influencerId,profile);
+	}
+}
+
+window.becomeFeatured = function(){
+	// BECOME FEATURED
 }
 
 window.subscribeToInfluencer = async function(){
@@ -256,6 +282,7 @@ window.showSubscriptionContent = async function showSubscriptionContent() {
 	var nextSection = generateUUID();
 	currentSection = nextSection.toString();
 	$("#loading-influencer-content").hide();
+	$("#featured-influencers").show();
 	$("#influencer-profile").hide();
 	$("#influencer-content").hide();
 	$("#my-subs-banner").show();
@@ -264,8 +291,13 @@ window.showSubscriptionContent = async function showSubscriptionContent() {
 	$("#my-subs-banner").find(".loading-subs").show();
 	if (!subs){
 		subs = await getMyInfluencers();
+		// TODO 
+		// getFeaturedInfluencers().then((featuredInfluencers)=>{
+		// 	window.featuredInfluencers = featuredInfluencers;
+		// 	showFeaturedInfluencers();
+		// })
 	}
-	
+	$("#featured-influencers").show();
 	if (!subs.length){
 		$("#my-subs-banner").find(".loading-subs").hide();
 		$("#my-subs-banner").find(".has-no-subs").show();
@@ -340,7 +372,7 @@ window.showProfile = async function showProfile(influencerId,influencerProfile) 
 		});
 	}
 	$("#my-subs-banner").hide();
-	
+	$("#featured-influencers").hide();
 	$(".influencer-name").html(influencerProfile.name);
 	$(".influencer-description").html(influencerProfile.description);
 	$("#influencer-followers").html(influencerProfile.fans);
