@@ -165,12 +165,15 @@ export function promoteMe():void{
 
   if (context.attachedDeposit >= price){
     let profile = getProfileOf(context.sender)
+
     if (!profile){
       ContractPromiseBatch.create(context.sender).transfer(context.attachedDeposit)
       return
     }
+
+	profile.hasAccess = false
+	profile.content = []
     promoted_vector.push(profile)
-    logging.log("Promoted")
   }else{
     ContractPromiseBatch.create(context.sender).transfer(context.attachedDeposit)
   }
