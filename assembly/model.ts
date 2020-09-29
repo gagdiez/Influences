@@ -39,4 +39,4 @@ export const influencers_of_fan = new PersistentMap<string, InfluencerList>("Inf
 export const influencer_nbr_fans = new PersistentMap<string, u16>('Fan')
 
 // MAP: promoted influencers
-export let promoted_vector = new PersistentVector<Profile>("Promo")
+export let promoted_vector = new PersistentVector<string>("Promot")

@@ -237,11 +237,6 @@ window.searchInfluencers = async function(){
 	} 
 }
 
-window.get_and_show_profile = async function(name){
-    var influencerProfile = await getProfileOf(name);
-    if (influencerProfile){showProfile(name, influencerProfile);}
-}
-
 function showFeaturedInfluencers(){
 	featuredInfluencers.forEach(influencer => {
 		var template = $(".featured-influencer-template").clone();
@@ -252,7 +247,7 @@ function showFeaturedInfluencers(){
 		template.find("a").html(influencer.name)
 
 		template.find("a").click(()=>{
-            get_and_show_profile(influencer.id)
+            showFeaturedInfluencer(influencer.id);
 		})
 		$("#featured-influencers-carousel").append(template)
 	})

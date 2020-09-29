@@ -1,4 +1,4 @@
-import { connect, utils, Contract, keyStores, WalletConnection } from 'near-api-js'
+import { connect, utils, providers, Contract, keyStores, WalletConnection } from 'near-api-js'
 import getConfig from './config'
 
 const nearConfig = getConfig('development')
@@ -42,13 +42,20 @@ export async function initNEAR() {
 
 export async function getPromoted(){
   // Returns array of Profiles
-  let promoted_profiles = await contract.getPromoted()
+  let account = window.walletConnection.account()
+  let result = await account.functionCall(nearConfig.contractName,
+                                          'getPromoted', {}, 300000000000000, 0)
+  let promoted_profiles = providers.getTransactionLastResult(result)
+
   for(let i=0; i<promoted_profiles.length; i++){
     let price = utils.format.formatNearAmount(promoted_profiles[i].price).toString()
     promoted_profiles[i].price = price
   }
   return promoted_profiles
 }
+
+window.nearConfig = nearConfig
+window.providers = providers
 
 export async function promoteMe(money_amount){
   let amount = utils.format.parseNearAmount(money_amount.toString())
@@ -104,7 +111,9 @@ export async function getProfileOf(influencer){
 
 export async function getMyInfluencers(){
   // Returns a list of strings (representing each influencer-id)
-  return await contract.getMyInfluencers()
+  let account = window.walletConnection.account()
+  let result = await account.functionCall(nearConfig.contractName, 'getMyInfluencers', {}, 300000000000000, 0)
+  return providers.getTransactionLastResult(result)
 }
 
 // SIA

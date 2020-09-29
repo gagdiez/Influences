@@ -154,26 +154,20 @@ export function getPromoted():Array<Profile>{
   let promoted:Array<Profile> = new Array<Profile>()
 
   for (let i=0; i < promoted_vector.length; i++){
-    promoted.push(promoted_vector[i])
+    let profile = getProfileOf(promoted_vector[i])
+    if(profile){
+      promoted.push(profile)
+    }
   }
 
   return promoted
 }
 
 export function promoteMe():void{
-  let price:u128 = u128.from('10000000000000000000000000')
+  let price:u128 = u128.from('10000000000000000000000000') // 10N
 
   if (context.attachedDeposit >= price){
-    let profile = getProfileOf(context.sender)
-
-    if (!profile){
-      ContractPromiseBatch.create(context.sender).transfer(context.attachedDeposit)
-      return
-    }
-
-	profile.hasAccess = false
-	profile.content = []
-    promoted_vector.push(profile)
+    promoted_vector.push(context.sender)
   }else{
     ContractPromiseBatch.create(context.sender).transfer(context.attachedDeposit)
   }
