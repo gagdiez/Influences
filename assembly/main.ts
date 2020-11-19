@@ -4,11 +4,20 @@ import {subscribed, influencers_content, influencers_profile,
         Content, InfluencerList, promoted_vector} from "./model"
 
 function hasAccessTo(influencer:string): bool{
-  if (context.sender == influencer){return true}
+  // Returns if you have access to the input influencer
 
+  if (context.sender == influencer){
+      // You have access to your own content
+      return true
+  }
+
+  // Key to denote influencer + user
   let key:string = influencer + "@" + context.sender
   
-  if (!subscribed.contains(key)){return false}
+  if (!subscribed.contains(key)){
+      // You are not subscribed to the influencer
+      return false
+  }
   
   // You are in the list... but lets check if one month has passed
   let when:u64 = subscribed.getSome(key)
@@ -16,14 +25,17 @@ function hasAccessTo(influencer:string): bool{
   let one_month:u64 = 2592000000000000 //one_minute:u64 = 60000000000
 
   if (now - when < one_month){return true}
-
+    
+  // More than a month has passed since the last payment, you are not subs.
   return false
 }
 
 export function subscribeTo(influencer: string): void {
+  // Allows you to subscribe to an influencer
   let profile = influencers_profile.get(influencer)
  
-  if(!profile){// Not an influencer
+  if(!profile){
+    // The influencer doesn't exists, return the money
     ContractPromiseBatch.create(context.sender).transfer(context.attachedDeposit)
     return
   }
@@ -79,7 +91,7 @@ export function deleteFromMyContent(sialink:string):bool{
 // PROFILE HANDLING
 
 export function getProfileOf(influencer:string): Profile | null{
-  
+  // get profile of an influencer  
   let profile = influencers_profile.get(influencer)
 
   if(!profile){return null}
