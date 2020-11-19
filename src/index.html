@@ -47,6 +47,10 @@
             <p class="font-italic text-muted mb-4">
               Create content. Share it. Earn Money.
             </p>
+
+            <p id="near_error" class="small text-danger" style="display:none">
+            NEAR returned an error, please try again :)
+            </p>
             <button type="button" class="btn btn-primary btn-lg mt-4"
                     id="login-btn" onclick="login()">
               Login with NEAR
@@ -64,7 +68,7 @@
   </section>
 
   <div id='logged-in' style="display:none">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white">
       <div class="container">  
 
         <a class="navbar-brand" href="#" onclick="showSubscriptionContent()">
@@ -99,6 +103,7 @@
               <i class="fas fa-caret-down"></i>
             </button>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+              <a id="menu_loading" class="dropdown-item text-muted text-center"> <i class="fas fa-sync fa-spin"></i></a>
               <a class="dropdown-item" data-toggle="modal" data-target="#edit-profile-modal" href="#" id="become-influencer-btn" style="display: none">Become an influencer</a>
               <a class="dropdown-item influencer-btn" onclick="showProfile()" href="#" style="display: none">My Profile</a>
               <a class="dropdown-item influencer-btn" type="button" onclick="editProfile()" href="#" style="display: none">Edit Profile</a>
@@ -113,7 +118,10 @@
     <section class="container featured-container" id="featured-influencers">
       <div id="carouselIndicators" class="carousel slide"
            data-interval="8000" data-ride="carousel">
-        <div class="carousel-inner" id="featured-influencers-carousel">
+        <div class="carousel-inner text-center" id="featured-influencers-carousel">
+          <p id="load_promo" style="margin-bottom: 0px;">
+            Loading promoted influencers <i class="fas fa-sync fa-spin"></i>
+          </p>
         </div>
         <a class="carousel-control-prev" href="#carouselIndicators"
            role="button" data-slide="prev">
@@ -131,7 +139,10 @@
     <div class="container content-container">
       <section id="my-subs-banner" style="text-align:center; margin:50px auto 35px auto;">
         <h1 class="display-5 text-black">Welcome back!</h1>
-        <p class="lead loading-subs">Finding your subscription content... <i class="fas fa-sync fa-spin"></i></p>
+        <p class="lead loading-subs">
+            Finding your subscription content... Please wait a little
+            <i class="fas fa-sync fa-spin"></i>
+        </p>
         <p class="lead has-subs">This is what your favourite influencers have been up to.</p>
         <p class="lead has-no-subs">You're not following anyone yet. Find some influencers and become a fan!</p>
       </section>
@@ -322,7 +333,7 @@
 
   </div>	
   <!-- jQuery -->
-  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <!-- Bootstrap -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
 

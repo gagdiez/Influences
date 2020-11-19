@@ -1,4 +1,4 @@
-import { connect, utils, providers, Contract, keyStores, WalletConnection } from 'near-api-js'
+import * as nearAPI from 'near-api-js'
 import getConfig from './config'
 
 const nearConfig = getConfig('development')
@@ -17,48 +17,57 @@ export function logout() {
 
 export async function initNEAR() {
   // Initialize connection to the NEAR testnet - CALL IT ON LOAD
-  const near = await connect(
-    Object.assign({deps:{keyStore: new keyStores.BrowserLocalStorageKeyStore()}},
-                  nearConfig)
+  window.near = await nearAPI.connect(
+      Object.assign(nearConfig,
+                    {deps:{keyStore: new nearAPI.keyStores.BrowserLocalStorageKeyStore()}})
   )
 
   // Initializing Wallet based Account
-  window.walletConnection = new WalletConnection(near)
+  window.walletConnection = await new nearAPI.WalletConnection(window.near,
+                                                               nearConfig.contractName)
+  try{
+    console.log("trying")
+    await walletConnection._completeSignInWithAccessKey()
+  }catch{
+    // weird fix for when the keys were not set up
+    console.log("catching")
+    walletConnection.signOut()
+    document.getElementById("near_error").style.display = "block"
+  }
 
   // Getting the Account ID
-  window.accountId = window.walletConnection.getAccountId()
+  window.walletAccount = window.walletConnection.account()
 
   // Initializing contract APIs
-  window.contract = new Contract(
-    window.walletConnection.account(),
+  window.contract = await near.loadContract(
     nearConfig.contractName,
     {viewMethods: [],
      changeMethods: ['subscribeTo', 'getMyInfluencers', 'addToMyContent',
                      'deleteFromMyContent', 'updateMyProfile', 'getProfileOf',
-                     'promoteMe', 'getPromoted']}
+                     'promoteMe', 'getPromoted'],
+     sender: window.walletAccount.accountId}
   )
-  return walletConnection.isSignedIn()
 }
 
 export async function getPromoted(){
   // Returns array of Profiles
   let account = window.walletConnection.account()
   let result = await account.functionCall(nearConfig.contractName,
-                                          'getPromoted', {}, 300000000000000, 0)
-  let promoted_profiles = providers.getTransactionLastResult(result)
+                                          'getPromoted', {}, 120000000000000, 0)
+  let promoted_profiles = nearAPI.providers.getTransactionLastResult(result)
 
   for(let i=0; i<promoted_profiles.length; i++){
-    let price = utils.format.formatNearAmount(promoted_profiles[i].price).toString()
+    let price = nearAPI.utils.format.formatNearAmount(promoted_profiles[i].price).toString()
     promoted_profiles[i].price = price
   }
   return promoted_profiles
 }
 
 window.nearConfig = nearConfig
-window.providers = providers
+window.providers = nearAPI.providers
 
 export async function promoteMe(money_amount){
-  let amount = utils.format.parseNearAmount(money_amount.toString())
+  let amount = nearAPI.utils.format.parseNearAmount(money_amount.toString())
   let account = window.walletConnection.account()
   account.functionCall(nearConfig.contractName, 'promoteMe', {}, 0, amount)
 }
@@ -71,7 +80,7 @@ export async function hasAccessTo(influencer){
 
 export async function subscribeTo(influencer, money_amount){
   // OPENS another webpage to pay
-  let amount = utils.format.parseNearAmount(money_amount.toString())
+  let amount = nearAPI.utils.format.parseNearAmount(money_amount.toString())
   let account = window.walletConnection.account()
   account.functionCall(nearConfig.contractName, 'subscribeTo',
                {influencer}, 0, amount)
@@ -95,7 +104,7 @@ export async function deleteFromMyContent(sialink){
 // PROFILE
 export async function updateMyProfile(name, banner, avatar, description, price){
   // Returns true if everything goes right
-  price = utils.format.parseNearAmount(price? price : "0");
+  price = nearAPI.utils.format.parseNearAmount(price? price : "0");
   return await contract.updateMyProfile({name, banner, avatar,
                                          description, price})
 }
@@ -104,7 +113,7 @@ export async function getProfileOf(influencer){
   // Returns NULL or {name:str, banner:str, avatar:str, description:str, price:str, fans:int}
   let profile = await contract.getProfileOf({influencer})
   if(!profile){console.error("Profile does not exist"); return;}
-  profile.price = utils.format.formatNearAmount(profile.price).toString()
+  profile.price = nearAPI.utils.format.formatNearAmount(profile.price).toString()
 
   return profile
 }
@@ -112,8 +121,8 @@ export async function getProfileOf(influencer){
 export async function getMyInfluencers(){
   // Returns a list of strings (representing each influencer-id)
   let account = window.walletConnection.account()
-  let result = await account.functionCall(nearConfig.contractName, 'getMyInfluencers', {}, 300000000000000, 0)
-  return providers.getTransactionLastResult(result)
+  let result = await account.functionCall(nearConfig.contractName, 'getMyInfluencers', {}, 120000000000000, 0)
+  return nearAPI.providers.getTransactionLastResult(result)
 }
 
 // SIA

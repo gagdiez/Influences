@@ -1,4 +1,3 @@
-
 import 'regenerator-runtime/runtime'
 
 
@@ -99,9 +98,7 @@ $(document).ready(function () {
     		$(".influencer-btn").show();
 			showProfile();
 		}
-		
-		
-		
+
 		var avatarFiles = $("#upload-avatar-input").prop('files');
 		var bannerFiles = $("#upload-banner-input").prop('files');
 		var uploads = {keys:{},files:[]};
@@ -168,28 +165,42 @@ $(document).ready(function () {
         	
 
     window.nearInitPromise = initNEAR()
-    .then(connected => { if (connected) loginFlow()
-                         else logoutFlow() })
-
+    .then(flow)
+    .catch(console.error)
 });
 
 // ------------------------------------------------------
 // USER LOGGED IN
 // ------------------------------------------------------
 
+function flow(){
+  if (!window.walletAccount.accountId){
+    logoutFlow()
+  }else{
+    window.accountId = window.walletAccount.accountId
+    loginFlow()  
+  }
+}
+
 async function loginFlow() {
-	$("#starting").hide();
+  $("#starting").hide();
   $("#logged-in").show();
   $(".logged-user-name").html(accountId);
-	getProfileOf(accountId).then(profile=>{
-		window.accountProfile = profile;
-		if (accountProfile) {
-	    	$(".influencer-btn").show();
-	    } else {
-	    	$("#become-influencer-btn").show();
-	    }
-	})
-	showSubscriptionContent();
+
+
+  getProfileOf(accountId).then(
+    profile => {
+      window.accountProfile = profile;
+      document.getElementById('menu_loading').style.display="none"
+      if (accountProfile) {
+        $(".influencer-btn").show();
+      } else {
+        $("#become-influencer-btn").show();
+      }
+    }
+  )
+
+  await showSubscriptionContent();
 }
 
 function logoutFlow(){
@@ -200,7 +211,6 @@ function logoutFlow(){
 // ------------------------------------------------------
 // FILE MANAGEMENT
 // ------------------------------------------------------
-
 
 function uploadFilePreview(uploader,callback){
 	// upload file in frontend and show preview
@@ -216,7 +226,6 @@ function uploadFilePreview(uploader,callback){
 		    }
 		    reader.readAsDataURL(uploader.files[0]); // convert to base64 string
 		}
-	    
     }
 }
 
@@ -237,7 +246,12 @@ window.searchInfluencers = async function(){
 	} 
 }
 
-function showFeaturedInfluencers(){
+async function showFeaturedInfluencers(){
+    let featuredInfluencers = await getPromoted()
+        
+    document.getElementById('load_promo').style.display = "none";
+    window.featuredInfluencers = featuredInfluencers;
+
 	featuredInfluencers.forEach(influencer => {
 		var template = $(".featured-influencer-template").clone();
 		template.removeClass("featured-influencer-template");
@@ -289,14 +303,14 @@ window.showSubscriptionContent = async function showSubscriptionContent() {
 
 	$("#my-subs-banner").find(".lead").hide();
 	$("#my-subs-banner").find(".loading-subs").show();
+
+
 	if (!subs){
 		subs = await getMyInfluencers();
-		// TODO 
-		getPromoted().then((featuredInfluencers)=>{
-			window.featuredInfluencers = featuredInfluencers;
-			showFeaturedInfluencers();
-		})
 	}
+
+    showFeaturedInfluencers();
+
 	$("#featured-influencers").show();
 	if (!subs.length){
 		$("#my-subs-banner").find(".loading-subs").hide();
@@ -313,6 +327,7 @@ window.showSubscriptionContent = async function showSubscriptionContent() {
 	$("#my-subs-banner").find(".loading-subs").hide();
 	$("#my-subs-banner").find(".has-subs").show();
 	showContentInGrid(content,false,nextSection.toString());
+
 }
 
 function profileChanged(p1,p2){
